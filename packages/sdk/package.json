@@ -1,0 +1,23 @@
+{
+  "name": "@agentprism/sdk",
+  "version": "0.1.0-dev",
+  "description": "Trace, optimize and guard LLM calls and agent systems in your own app. Local-first, zero dependencies.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "llm",
+    "agents",
+    "observability",
+    "tracing",
+    "evals",
+    "semantic-cache",
+    "model-routing",
+    "anthropic"
+  ],
+  "license": "MIT"
+}

@@ -1,0 +1,33 @@
+{
+  "name": "agentprism",
+  "version": "0.1.0-dev",
+  "description": "Devtools for AI coding agents: see where your tokens go, catch waste, fix it, prove it.",
+  "type": "module",
+  "bin": {
+    "agentprism": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=22.13"
+  },
+  "keywords": [
+    "claude-code",
+    "ai-agents",
+    "coding-agents",
+    "llm",
+    "tokens",
+    "observability",
+    "devtools"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "tsup"
+  },
+  "devDependencies": {
+    "@agentprism/adapter-claude-code": "*",
+    "@agentprism/adapter-traces": "*",
+    "@agentprism/core": "*"
+  }
+}

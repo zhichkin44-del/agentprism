@@ -1,0 +1,134 @@
+# Progress log
+
+Newest entry on top. Each entry: what was done, what was found, what is next.
+
+---
+
+## 2026-10-23 — Repositioning + M5 SDK
+
+**Done**
+
+- Positioning (D19): control plane for LLM and agent systems — measure → simulate → optimize → guard → prove.
+  VISION, ROADMAP, PLAN rewritten; every capability is a module.
+- Russian primer for the user (Claude Doc "Конспект: токены, качество и AgentPrism") with a method diagram
+  and the waste chart.
+- `@agentprism/sdk` (zero deps): `agentprism({ app })`, `instrument(client)` for `messages.create`
+  (plain + `stream: true`) and `messages.stream()`, `withSession` / `withTurn` / `withAgent`, `tool()`,
+  middleware pipeline (`before` / `after`), capture hashes by default (D20–D23).
+- Trace format v1 (`TRACE_FORMAT.md`) + `adapter-traces`; store schema v4 (agent, prefix/prompt hashes, latency).
+- Product detectors: uncached prompts, unstable prompt prefix, duplicate requests. `report` shows apps and agents.
+- 47 tests incl. an end-to-end app → traces → findings test.
+
+**Found**
+
+- Two bugs caught by the new tests: SQL `agent` was ambiguous (sessions also has an `agent` column); `after`
+  modules ran after the trace was written, so guard notes were lost. Both fixed.
+- A cached answer must be traced with zero usage and a new id, or savings would count as spend (D22).
+
+**Next**
+
+- Instrument one of the user's real products with the SDK to get real app traces.
+- M6 simulations: routing what-if, semantic-cache what-if (needs `capture: "text"` or `lastUserHash`).
+- OpenAI client support; OTel importer; SDK build for npm.
+
+---
+
+## 2026-10-23 — M2 Money, M3 Detectors, M4 compare
+
+**Done**
+
+- Direction from the user: terminal first, web app later (D14); everything is a module (D15);
+  scope widened to end-to-end analytics for the user's own AI products (D16, planned as M6 / v0.2).
+- Module system: `Plugin`, `Registry`, `--plugin`, `agentprism modules`; built-ins are plugins too.
+- Pricing: list prices 2026-10-06, long-prompt tier, local overrides; `ap_cost()` registered in SQL (D17, D18).
+- `report` (spend by project/model/day/session/prompt, cache savings, cost by token kind).
+- 8 detectors with evidence + suggestion; `findings`; `mark` + `compare` for before/after.
+- 34 tests (pricing ≡ SQL, every detector, registry/plugin loading, compare).
+- Baseline written to `METRICS.md`.
+
+**Found**
+
+- ~60% of the author's $836 (API-eq.) is estimated waste, almost all from **session length**:
+  context growth $393, cache rebuilds after breaks $101. Tools/loops/reads are cheap ($8 together).
+- Image tool results are base64: measuring them by characters overstated them ~100× (first version
+  reported $471 waste for a $109 session). Fixed: images counted separately; waste capped per session.
+- Claude Code already de-duplicates unchanged re-reads, so repeated reads cost little.
+
+**Next**
+
+- User applies the top suggestion (one task per session, fresh session after breaks) and runs
+  `agentprism mark "short sessions"`; re-measure in a week.
+- M4: split compare by call time. M5: fix modules that write CLAUDE.md / permission patches.
+- M6: SDK + adapter for the user's own AI products.
+
+---
+
+## 2026-10-23 — M1 Foundation
+
+**Done**
+
+- Name confirmed: AgentPrism. Launch plan written (`LAUNCH.md`).
+- npm workspaces monorepo (pnpm was not installed; npm needs no extra tool — D12).
+- `core`: normalized schema, plugin interfaces, SQLite store with incremental, idempotent ingest, overview query.
+- `adapter-claude-code`: streaming, tolerant parser; fast-skips heavy record types before JSON.parse.
+- `agentprism` CLI: `scan` with a terminal summary and `--json`. Zero runtime dependencies, 32 KB bundle.
+- 13 tests on synthetic fixtures; CI for Linux/macOS/Windows × Node 22/24 (not yet run — no remote).
+
+**Found (on the author's 408 MB of logs)**
+
+- First scan 2.9 s, incremental re-scan 0.14 s — well inside the VISION targets (15 s / 1 s).
+- Resumed sessions copy history into new files with the original `sessionId`: 2,770 duplicated requests.
+  Global de-duplication by `requestId` is required (and implemented).
+- Tool-use blocks also repeat: 15,769 on disk, 6,727 unique.
+- `cost-state` is partial (not written on every run); our transcript totals match it within 0.3%
+  where it covers the full session. Treat it as a cross-check only.
+- 98.9% of all tokens are cache reads. Main-model calls only; internal Haiku calls are not in transcripts.
+
+**Next**
+
+- First commit — needs the git author name/email from the user.
+- M2: price table and API-equivalent cost, breakdowns, baseline in METRICS.md.
+
+---
+
+## 2026-10-23 — M0 Product definition (bar raised)
+
+**Done**
+
+- Raised the ambition: flagship open-source devtool, target 1,000+ stars, room to grow into a platform.
+- Wrote VISION.md and ROADMAP.md (v0.1 → v1.0 + launch plan); reworked PLAN.md for v0.1 in ~16h.
+- Architecture: pnpm monorepo, plugin interfaces (Adapter / Detector / Fix), OTel-aligned schema.
+- Shape decided: CLI + local web app via `npx agentprism`, no Electron (D11).
+- Renamed AgentLens → AgentPrism (D10, waiting for user confirmation).
+
+**Found**
+
+- Crowded "usage counter" space: ccusage (~10k stars), ccboard, ccost, tokentrail, agentxray, agentscope.
+  Our edge is why → fix → proof, cross-agent comparison, AI-code outcomes (D9).
+- npm: `agentlens` taken, `agentprism` free.
+
+**Next**
+
+- User confirms the name → first commit → M1 Foundation.
+
+---
+
+## 2026-10-23 — M0 Setup
+
+**Done**
+
+- Chose the project: AgentLens (after considering a real-time voice translator, dropped).
+- Inspected local Claude Code logs: 6 project folders, 34 session files, ~408 MB.
+- Wrote working docs and initialized git.
+
+**Found**
+
+- Every assistant record carries `message.usage` with input, output, cache read/write and thinking tokens.
+- `cost-state` records carry Claude Code's own `totalCostUSD` and lines added/removed — useful to cross-check our cost math.
+- One API response is spread over several JSONL lines (one per content block) — usage must be de-duplicated.
+- Details in `docs/LOG_FORMAT.md`.
+
+**Next**
+
+- First commit (needs the user's OK).
+- Start M1: TypeScript skeleton, then the parser.
