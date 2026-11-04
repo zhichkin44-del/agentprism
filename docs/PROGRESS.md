@@ -4,6 +4,34 @@ Newest entry on top. Each entry: what was done, what was found, what is next.
 
 ---
 
+## 2026-11-05 — `compare` rebuilt after R3; switchback
+
+**Done**
+
+- Core `estimateEffect` / `beforeAfterEffect` / `switchbackEffect`: a turn-level regression adjusted for
+  prompt size, model, origin, main project and a day trend.
+  - Day permutation gives p, a day bootstrap gives the interval.
+  - The noise floor comes from permutation plus placebo splits before the mark.
+  - Verdicts: cheaper / costlier / no clear change / not enough data, with reasons (D29).
+- `agentprism switchback <name> [--days n]` stores a balanced random ON/OFF schedule as a mark.
+  `compare --split <name>` then compares ON with OFF days.
+- `compare` keeps the descriptive table, labelled as such, and prints the adjusted effect under it.
+- Tests:
+  - two days on a side → not enough data;
+  - steady 4%/day drift → no clear change;
+  - a 40% drop at the mark → cheaper;
+  - a 40% saving on switchback ON days with drift → cheaper;
+  - the schedule is balanced and reproducible.
+- FINDINGS: switchback as a candidate for novelty, with the search date and what was found.
+
+**Found**
+
+- The first version (no trend) called steady drift a change; a test caught it. The trend term fixes it.
+- On real logs the 10-30 split shows the contrast. The table says +20,652% median $/prompt. The adjusted
+  effect says +30%, interval −41% … +840%, p = 0.36: no clear change. It runs in under 1 s.
+
+---
+
 ## 2026-11-05 — README for launch
 
 **Done:** README rewritten around context economics. It covers the findings with numbers that hold up,

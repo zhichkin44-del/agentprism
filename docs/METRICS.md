@@ -127,3 +127,13 @@ Definitions and caveats are in `RESEARCH.md`; scripts in `research/`.
 | Log signals predicting survival (AUROC, held-out sessions)  | ≤ 0.57 for durability (CI lower ≈ 0.51)                 |
 | Shipped `compare` at fake marks (placebo)                   | apparent change median ~13×; 16/30 flagged              |
 | Adjusted turn-level estimator at fake marks                 | −7% to −35%; 1/9 flagged; 50% not detectable in 12 days |
+
+## Before/after (`compare`, D29)
+
+| Metric       | Definition                                                                                                                                 |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Effect       | exp(τ) − 1, τ = coefficient of "changed" in OLS of log cost per turn on log first-call prompt size, model, origin, main project, day trend |
+| 95% interval | 2.5–97.5 percentiles of the effect over day-level bootstrap resamples within each arm                                                      |
+| p            | share of day-label permutations with \|τ\| at least as large                                                                               |
+| Noise floor  | max(95th pct of permuted \|τ\|, 90th pct of \|τ\| at fake splits inside the "before" period), as a relative change                         |
+| Verdict      | cheaper / costlier only if p < 0.05, \|τ\| > floor and the interval excludes 0; not enough data below 3 days or 20 prompts a side          |

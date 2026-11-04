@@ -76,7 +76,8 @@ a compaction makes the agent forget. It is a choice, not a measurement (yet).
 | `agentprism report`      | spend by project, model, day, session and prompt; cache savings; cost by token kind        |
 | `agentprism findings`    | waste detectors with evidence, an estimated cost and a concrete fix for each finding       |
 | `agentprism mark <name>` | remember the moment you changed something (CLAUDE.md, habit, model)                        |
-| `agentprism compare`     | before vs after that mark (see the caveat below)                                           |
+| `agentprism compare`     | did it get cheaper? adjusted effect, 95% interval, noise floor, honest verdict             |
+| `agentprism switchback`  | plan a test that survives drift: a random ON/OFF schedule by day, analysed by `compare`    |
 | `agentprism modules`     | loaded plugins, adapters and detectors                                                     |
 
 Add `--json` to any command for scripts, `--plugin ./my-plugin.mjs` to load your own modules.
@@ -103,8 +104,11 @@ scripts that produced it are in [`research/`](research).
   not a bill.
 - "After its last use" is an **upper bound**. Use by meaning, without a shared identifier, is invisible.
   Dropping a block from the middle of a cached prompt is not free.
-- **`compare` is not yet trustworthy on a mixed history.** A placebo study showed large apparent changes
-  where nothing changed. A fix is planned: an adjusted estimator, intervals, and a switchback schedule.
+- **A plain before/after rarely proves anything on one person's logs.** A placebo study found
+  order-of-magnitude apparent changes where nothing changed, because work drifts. `compare` therefore
+  adjusts for prompt size, model, origin, project and trend. It reports an interval and the noise floor,
+  and says "no clear change" or "not enough data" when that is the truth. To prove a change, use
+  `agentprism switchback`.
 
 ## Privacy
 

@@ -171,3 +171,22 @@ be useful, and reports are meant to be shown to other people.
 
 `docs/FINDINGS.md` is the one-page summary of the research, for the owner and a future site page. The repo is
 English-only (D6), so the Russian original lives in the Studio's session notes, outside git.
+
+## D29 — `compare` reports an adjusted effect with an honest verdict (2026-11-05)
+
+The per-session medians failed a placebo test (R3), so they stay in the table as description only. The
+verdict comes from a turn-level regression of log cost per turn. It adjusts for prompt size at the
+start, model, origin, the busiest project and a linear trend over days (an interrupted time series),
+so steady drift is not read as a change; a test caught exactly that before the trend was added.
+
+- Days are the unit of time: a permutation of days gives p, and a bootstrap of days gives the interval.
+- The noise floor is the larger of the 95th-percentile permuted effect and the 90th-percentile placebo
+  effect inside the "before" period.
+- "Cheaper" or "costlier" needs all three: p < 0.05, the effect beyond the noise floor, and an interval
+  that excludes zero.
+- Fewer than 3 days or 20 prompts on a side gives "not enough data", with the reason.
+- The day of the mark itself is left out.
+
+`agentprism switchback <name>` stores a random ON/OFF schedule, balanced in pairs of days, as a mark.
+`compare` on that mark then compares ON days with OFF days. Why: randomizing in time is the only design
+that cancels drift on one person's history.

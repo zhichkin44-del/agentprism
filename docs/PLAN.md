@@ -37,7 +37,7 @@ Status markers: `[ ]` todo, `[~]` in progress, `[x]` done.
 ## M4 — Prove it (closed loop)
 
 - [x] `agentprism mark "<what changed>"` and `agentprism compare` (before vs after, per-session medians)
-- [ ] Split by call time instead of session start (long sessions straddle a mark)
+- [x] Split by call time instead of session start (turn-level estimator, D29)
 - [ ] Apply the top suggestions to the author's own workflow, mark it, re-measure after a week
 - [ ] Before/after table in `METRICS.md` and README
 
@@ -94,3 +94,4 @@ Direction from the owner (2026-11-04): research first, then a technology nobody 
 - [ ] A measured price of forgetting, to replace the chosen `--rho`
 - [x] R3 placebo study (shipped `compare` not trustworthy on mixed histories; switchback design)
 - [x] `--watch`: live advice on a running session
+- [x] `compare` rebuilt: adjusted effect, interval, noise floor, verdict; `switchback` schedules (D29)

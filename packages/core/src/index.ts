@@ -8,6 +8,7 @@ export { costOf, installPricing } from "./pricing/sql.js";
 export * from "./analytics/spend.js";
 export * from "./analytics/compare.js";
 export * from "./analytics/price-check.js";
+export * from "./analytics/effect.js";
 export * from "./context/timeline.js";
 export * from "./context/ledger.js";
 export * from "./context/advisor.js";

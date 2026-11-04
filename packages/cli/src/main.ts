@@ -14,11 +14,15 @@ import {
   overview,
   runDetectors,
   compare,
+  beforeAfterEffect,
+  switchbackEffect,
+  switchbackSchedule,
+  type Switchback,
   spend,
   type PriceTable,
 } from "@agentprism/core";
 import pkg from "../package.json" with { type: "json" };
-import { printCompare } from "./compare.js";
+import { printCompare, printSwitchbackPlan, printSwitchbackResult } from "./compare.js";
 import { analyseContext, pickSession, printContext, watchContext } from "./context.js";
 import { publicReport, renderContextHtml } from "./context-html.js";
 import { printFindings } from "./findings.js";
@@ -37,7 +41,9 @@ Commands
   findings      Waste detectors: what cost money for nothing, and how to fix it
   scan          Ingest logs and print what is in the database
   mark <name>   Remember "now" as the moment something changed (new CLAUDE.md, habit, model)
-  compare       Before vs after a mark or date: is it actually cheaper and smoother?
+  compare       Before vs after a mark or date, adjusted, with an interval and a noise floor
+  switchback <name>  Plan a test that survives drift: a random ON/OFF schedule by day
+                (--days, default 14); afterwards "compare --split <name>" compares ON vs OFF days
   modules       List loaded plugins and their modules
   context [s]   Context economics of a session (id prefix or title; default: the latest):
                 what the prompt carries after its last use, and when to compact. Advisory.
@@ -50,6 +56,7 @@ Options
   --top <n>            Rows per table (default: 10)
   --split <mark|date>  compare: the mark name or YYYY-MM-DD to split at (default: latest mark)
   --note <text>        mark: what changed
+  --days <n>           switchback: how many days to plan (default 14)
   --full               Re-read all logs, not only new or changed ones
   --no-scan            Use the database as is, do not read logs first
   --rho <usd>          context: price of forgetting per compaction (default 0.5)
@@ -73,6 +80,7 @@ const COMMANDS = new Set([
   "compare",
   "modules",
   "context",
+  "switchback",
 ]);
 
 /** A mark name, a date, or (by default) the latest mark. */
@@ -89,6 +97,18 @@ function resolveSplit(
   if (mark) return { ts: mark.ts, label: mark.name };
   const ts = Date.parse(split);
   return Number.isFinite(ts) ? { ts, label: split } : undefined;
+}
+
+/** The switchback schedule stored with a mark, if that mark is one. */
+function switchbackOf(store: Store, name: string | undefined): Switchback | undefined {
+  const note = store.marks().find((m) => m.name === name)?.note;
+  if (!note?.startsWith("{")) return undefined;
+  try {
+    const s = JSON.parse(note) as Switchback;
+    return s.kind === "switchback" && Array.isArray(s.on) && Array.isArray(s.off) ? s : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 function home(): string {
@@ -121,6 +141,7 @@ export async function main(argv: string[]): Promise<number> {
       html: { type: "string" },
       watch: { type: "boolean", default: false },
       every: { type: "string", default: "20" },
+      days: { type: "string", default: "14" },
       version: { type: "boolean", short: "v", default: false },
       help: { type: "boolean", short: "h", default: false },
     },
@@ -262,6 +283,13 @@ export async function main(argv: string[]): Promise<number> {
         );
         return 2;
       }
+      const schedule = switchbackOf(store, values.split);
+      if (schedule) {
+        const effect = switchbackEffect(store, schedule);
+        out.compare = { switchback: schedule, effect };
+        if (!values.json) printSwitchbackResult(values.split ?? "", schedule, effect);
+        return 0;
+      }
       const runs = await runDetectors(registry.detectors, { store });
       const c = compare(
         store,
@@ -269,8 +297,22 @@ export async function main(argv: string[]): Promise<number> {
         split.label,
         runs.flatMap((r) => r.findings),
       );
-      out.compare = c;
-      if (!values.json) printCompare(c);
+      const effect = beforeAfterEffect(store, split.ts);
+      out.compare = { ...c, effect };
+      if (!values.json) printCompare(c, effect);
+    }
+    if (command === "switchback") {
+      const name = positionals[1];
+      if (!name) {
+        process.stderr.write("Usage: agentprism switchback <name> [--days n]\n");
+        return 2;
+      }
+      const days = Math.max(2, Number.parseInt(values.days, 10) || 14);
+      const schedule = switchbackSchedule(Date.now(), days);
+      // Stored as a mark; its note holds the schedule, so compare finds it by name.
+      store.mark(name, Date.now(), JSON.stringify(schedule));
+      out.switchback = schedule;
+      if (!values.json) printSwitchbackPlan(name, schedule);
     }
 
     if (values.json) process.stdout.write(JSON.stringify(out, null, 2) + "\n");

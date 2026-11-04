@@ -48,6 +48,23 @@ and prices in the cost of forgetting.
 - 2025–2026 research optimizes compaction for token counts. One study shows that in Claude Code cutting
   tokens can raise the bill, because of the cache. We found no cache-priced rule for when to compact.
 
+**A second candidate: switchback tests for a coding-agent workflow.** Before/after on one person's logs
+does not work. On 12 days with no change at all, the naive comparison reported changes of an order of
+magnitude, because the work drifts. Switching the change on and off on random days cancels the drift.
+AgentPrism plans such a schedule (`agentprism switchback`) and analyses it from the logs with an adjusted
+estimator. The design itself is standard in marketplace experiments. Applying it to coding-agent
+workflows, measured from the agent's own logs, we have not found anywhere.
+
+- _How we checked._ Web searches on 2026-11-05 for switchback experiments with coding agents, Claude Code
+  or AI agents, plus a 2025–2026 literature sweep on 2026-11-04 for causal before/after methods on
+  agent logs (CUPED, difference-in-differences, synthetic control).
+- _What we did find._ A general tutorial on switchback designs for LLM-platform features, on synthetic
+  data ([freeCodeCamp](https://www.freecodecamp.org/news/switchback-experiments-for-ai-platform-features-in-python)).
+  General switchback overviews ([Statsig](https://www.statsig.com/blog/switchback-experiments)).
+  Research on the design itself ([arXiv 2506.12654](https://arxiv.org/abs/2506.12654)).
+- _Caveat._ "Not found" is not proof.
+- _Known weakness._ Carry-over: a session that runs into the next day keeps the old setting.
+
 ## Evidence
 
 - The cost accounting is checked against Claude Code's own records.
