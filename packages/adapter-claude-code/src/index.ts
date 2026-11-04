@@ -4,8 +4,10 @@ import path from "node:path";
 import readline from "node:readline";
 import type { Adapter, AgentEvent, ReadStats, SourceFile } from "@agentprism/core";
 import { RecordParser } from "./parse.js";
+import { readTimeline } from "./timeline.js";
 
 export { RecordParser, mapUsage, measureResult } from "./parse.js";
+export { readTimeline } from "./timeline.js";
 
 export const CLAUDE_CODE = "claude-code";
 
@@ -26,6 +28,7 @@ export function claudeCodeAdapter(options: ClaudeCodeOptions = {}): Adapter {
   return {
     id: CLAUDE_CODE,
     displayName: "Claude Code",
+    timeline: readTimeline,
 
     async discover(): Promise<SourceFile[]> {
       let entries: fs.Dirent[];

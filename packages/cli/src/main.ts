@@ -19,6 +19,8 @@ import {
 } from "@agentprism/core";
 import pkg from "../package.json" with { type: "json" };
 import { printCompare } from "./compare.js";
+import { analyseContext, pickSession, printContext } from "./context.js";
+import { publicReport, renderContextHtml } from "./context-html.js";
 import { printFindings } from "./findings.js";
 import { printOverview, printScan, printSpend } from "./report.js";
 import { scan } from "./scan.js";
@@ -37,6 +39,8 @@ Commands
   mark <name>   Remember "now" as the moment something changed (new CLAUDE.md, habit, model)
   compare       Before vs after a mark or date: is it actually cheaper and smoother?
   modules       List loaded plugins and their modules
+  context [s]   Context economics of a session (id prefix or title; default: the latest):
+                what the prompt carries after its last use, and when to compact. Advisory.
 
 Options
   --root <dir>         Claude Code logs directory (default: ~/.claude/projects)
@@ -48,6 +52,8 @@ Options
   --note <text>        mark: what changed
   --full               Re-read all logs, not only new or changed ones
   --no-scan            Use the database as is, do not read logs first
+  --rho <usd>          context: price of forgetting per compaction (default 0.5)
+  --html <file>        context: also write an anonymized HTML report
   --json               Print machine-readable JSON
   -v, --version        Print the version
   -h, --help           Print this help
@@ -56,7 +62,16 @@ Costs are API-equivalent estimates from list prices; override them in ~/.agentpr
 Everything runs locally. Your logs never leave this machine.
 `;
 
-const COMMANDS = new Set(["summary", "report", "findings", "scan", "mark", "compare", "modules"]);
+const COMMANDS = new Set([
+  "summary",
+  "report",
+  "findings",
+  "scan",
+  "mark",
+  "compare",
+  "modules",
+  "context",
+]);
 
 /** A mark name, a date, or (by default) the latest mark. */
 function resolveSplit(
@@ -100,6 +115,8 @@ export async function main(argv: string[]): Promise<number> {
       full: { type: "boolean", default: false },
       scan: { type: "boolean", default: true },
       json: { type: "boolean", default: false },
+      rho: { type: "string" },
+      html: { type: "string" },
       version: { type: "boolean", short: "v", default: false },
       help: { type: "boolean", short: "h", default: false },
     },
@@ -199,6 +216,27 @@ export async function main(argv: string[]): Promise<number> {
           `\nMarked "${name}". Work as usual, then run: agentprism compare --split "${name}"\n\n`,
         );
       }
+    }
+    if (command === "context") {
+      const session = pickSession(store, positionals[1]);
+      if (!session) {
+        process.stderr.write("No matching session with model calls.\n");
+        return 2;
+      }
+      const rho = values.rho === undefined ? undefined : Number(values.rho);
+      if (rho !== undefined && !(rho >= 0)) {
+        process.stderr.write("--rho must be a number of dollars, 0 or more.\n");
+        return 2;
+      }
+      const r = await analyseContext(store, registry.adapters, session, { rho });
+      if (typeof r === "string") {
+        process.stderr.write(r + "\n");
+        return 2;
+      }
+      const report = publicReport(r, pkg.version);
+      out.context = report;
+      if (values.html) fs.writeFileSync(values.html, renderContextHtml(report));
+      if (!values.json) printContext(r, values.html);
     }
     if (command === "compare") {
       const split = resolveSplit(store, values.split);

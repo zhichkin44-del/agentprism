@@ -4,6 +4,37 @@ Newest entry on top. Each entry: what was done, what was found, what is next.
 
 ---
 
+## 2026-11-04 (late night) — Context economics advisor (M10)
+
+**Done**
+
+- `agentprism context [session] [--rho <usd>] [--html <file>]`.
+  - Terminal output: what the prompt carries (always needed / in use / after its last use / earlier
+    thinking), where the dead weight is, what sits idle now, and when to compact (as recorded vs the
+    ski-rental rule vs the exact optimum, plus advice for now).
+  - HTML report: anonymized, built from a separate public model (D27).
+- Adapter `timeline()` reads content on demand. Core `contextLedger` and `compactionPlan` are ported from
+  `research/` and tested on synthetic data.
+- `docs/FINDINGS.md`: the one-page summary in English (D28).
+
+**Checked on real logs**
+
+| Session                | Calls | Recorded | Rule | Optimum |
+| ---------------------- | ----- | -------- | ---- | ------- |
+| The 3,009-call session | 3,009 | $348     | $234 | $227    |
+| "Studio AI"            | —     | $309     | $224 | $217    |
+
+- Both runs are at ρ = $0.50. The 3,009-call session took about 5 s; dead weight after last use was 25%
+  of its prompt cost.
+- The live session (this one) shows "compact now".
+- 55 tests pass, and the bundled CLI works.
+
+**Next**
+
+- The owner labels 60 pairs; R3; a measured price of forgetting to replace the chosen `--rho`.
+
+---
+
 ## 2026-11-04 (late) — R4 code survival (negative); research paused for review
 
 **Done**

@@ -1,3 +1,4 @@
+import type { Timeline } from "./context/timeline.js";
 import type { AgentEvent, AgentId } from "./schema.js";
 import type { Store } from "./store/store.js";
 
@@ -32,6 +33,11 @@ export interface Adapter {
   displayName: string;
   discover(): Promise<SourceFile[]>;
   read(file: SourceFile, stats: ReadStats): AsyncIterable<AgentEvent>;
+  /**
+   * Optional: one session's main chain with content, read from its source files on demand, for
+   * analyses that need text (the context ledger). Never stored.
+   */
+  timeline?(files: SourceFile[], sessionId: string): Promise<Timeline>;
 }
 
 /** What every analysis module gets: the store (with `ap_cost` registered) and its settings. */

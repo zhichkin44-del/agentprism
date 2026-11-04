@@ -107,6 +107,7 @@ interface Adapter {
   id: string; // "claude-code"
   discover(): Promise<SourceFile[]>; // where the logs are on this machine
   read(file: SourceFile): AsyncIterable<Event>; // normalized events, never throws on unknown data
+  timeline?(files: SourceFile[], sessionId: string): Promise<Timeline>; // content on demand, never stored (D27)
 }
 
 interface Detector {

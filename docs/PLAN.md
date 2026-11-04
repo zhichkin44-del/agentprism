@@ -79,3 +79,16 @@ TypeScript sources inside the monorepo today).
 
 - Fix modules (CLAUDE.md / permission patches), more coding-agent adapters
 - Web app over the same modules and JSON
+
+## M10 — Context economics (advisor)
+
+Direction from the owner (2026-11-04): research first, then a technology nobody has. Evidence in `RESEARCH.md`.
+
+- [x] Research R1 (dead context), R2 (when to compact), Q1 (price of forgetting), R4 (negative)
+- [x] Adapter `timeline()`: one session's content on demand, never stored (D27)
+- [x] Core: context ledger (cost and use of every block) and the ski-rental compaction advisor with the
+      exact optimum for comparison
+- [x] `agentprism context [session] [--rho] [--html]`: terminal report plus an anonymized HTML report
+- [ ] Owner labels 60 sampled pairs: precision of correction detection, gold data for the owner's voice
+- [ ] R3: placebo study for before/after
+- [ ] A measured price of forgetting, to replace the chosen `--rho`

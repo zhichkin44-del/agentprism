@@ -157,3 +157,17 @@ result. That is the agent checking its work, not a loop. On real logs, loop find
 
 A denied tool call is the user's protection working, so its cost is not waste. Only an identical call asked
 again after a denial is waste. The permission-friction finding still reports the counts.
+
+## D27 — Context economics reads content on demand and never stores it (2026-11-04)
+
+The context ledger needs text: it checks which later outputs reuse a block's identifiers. The store keeps
+only hashes (D21), so an adapter may implement `timeline(files, sessionId)`. That reads one session's main
+chain with content from its own log files, in memory, for the duration of the analysis. The HTML report is
+built from a separate public model (`publicReport`) that holds numbers, dates, model names and block kinds
+only. A test checks that no text, path, title or session id gets through. Why: the advisor needs content to
+be useful, and reports are meant to be shown to other people.
+
+## D28 — Research summary in English in the repo; the Russian original stays private (2026-11-04)
+
+`docs/FINDINGS.md` is the one-page summary of the research, for the owner and a future site page. The repo is
+English-only (D6), so the Russian original lives in the Studio's session notes, outside git.
