@@ -334,3 +334,44 @@ and 32 failed or were denied. That leaves 1,566 edits in 22 sessions, in 14 Stud
 - (b) Some signals are almost absent (0 interrupts, 1 exact undo, 15 strict corrections).
 - (c) Line matching misses survival under reformatting.
 - (d) Survival mixes mistakes with normal evolution, and these logs cannot separate the two.
+
+## R3 result — can a before/after comparison be trusted? (2026-11-05)
+
+Scripts: `research/r3-placebo.mts` (the shipped `compare`) and `research/r3-adjusted.mts` (a fix). Run
+them with `npx tsx <script> <db>`. Data: 99 sessions, 1,005 turns, 12 days.
+
+**How it is measured.** The logs contain no deliberate change, so every split point is a fake "mark": a
+placebo. Anything a comparison reports at a fake mark is noise plus the natural drift of the work, and
+that is the floor a real change must beat. A trustworthy test flags about 5% of fake marks. Power is
+measured by injecting a known effect: the "after" side is made 10–50% cheaper.
+
+| Method                                                                 | Apparent change at fake marks | Test flags fake marks          | Detects an injected 50% saving      |
+| ---------------------------------------------------------------------- | ----------------------------- | ------------------------------ | ----------------------------------- |
+| Shipped `compare`: median cost per prompt by session                   | median ~13×, up to 230×       | 16 of 30 (session permutation) | no better than the false-alarm rate |
+| Turns, adjusted for prompt size, model, origin, project; days permuted | −7% to −35%                   | 1 of 9                         | p ≈ 0.08 (not significant)          |
+
+**What it says.**
+
+1. **The shipped `compare` must not be trusted on a mixed history.** Short automated crew sessions and
+   long interactive ones shift in proportion over time. The median per session then swings by an order
+   of magnitude with no change at all, and a permutation test that assumes exchangeable sessions raises
+   false alarms half the time.
+2. **Adjusting for what is known before a turn removes most of the mix effect.** Those covariates are
+   prompt size at the start, model, who started it, and project. Testing by whole days then gives about
+   the right false-alarm rate. The natural drift stays at 20–35% over 12 days: the work itself got
+   cheaper per turn.
+3. **Twelve days cannot prove a change.** Even a true 50% saving does not reach significance with 12
+   days of day-level variation. A before/after on one person's logs needs weeks, or a better design.
+4. **The better design is a switchback.** Turn the change on and off on alternate days (or half-days) at
+   random, then compare on-days with off-days with the adjusted estimator. Randomizing in time cancels
+   drift, which is exactly what sank the placebo test. This is standard for marketplaces; we found no use
+   of it for coding agents.
+
+**Where it can lie.** (a) 9–30 fake marks on one history are not independent. (b) Twelve days give a
+coarse day-permutation distribution (p cannot go much below 0.003 and is noisy). (c) The covariates do
+not capture the kind of task. (d) The injected effect is uniform; real changes hit some turns more than
+others.
+
+**Consequence for the product.** `compare` should use the adjusted turn-level estimator, report an
+interval and the noise floor, say when the data cannot support a conclusion, and offer a switchback
+schedule for a change the user wants to prove.

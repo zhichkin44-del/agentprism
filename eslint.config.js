@@ -7,7 +7,7 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     // Research scripts run directly under Node and print their results.
-    files: ["research/**/*.mjs"],
+    files: ["research/**/*.mjs", "research/**/*.mts"],
     languageOptions: { globals: { process: "readonly", console: "readonly" } },
   },
   {

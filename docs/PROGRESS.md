@@ -4,6 +4,31 @@ Newest entry on top. Each entry: what was done, what was found, what is next.
 
 ---
 
+## 2026-11-05 — R3 placebo study of before/after
+
+**Done**
+
+- `research/r3-placebo.mts` puts fake marks on a history with no deliberate change and runs the shipped
+  `compare`. It also measures the false alarms and power of a session permutation test.
+- `research/r3-adjusted.mts` tests a fix: a turn-level regression adjusted for prompt size, model, origin
+  and project, with a permutation of whole days.
+
+**Found**
+
+- The shipped `compare` reports a median apparent change of ~13× at fake marks. The mix of short crew
+  sessions and long interactive ones drifts over time. A session permutation test flags 16 of 30 fake
+  marks.
+- The adjusted estimator brings fake changes down to −7…−35%, with 1 of 9 flagged. But 12 days cannot
+  show even a real 50% saving (p ≈ 0.08).
+- The recommended design is a switchback: alternate the change by day at random.
+
+**Next**
+
+- `--watch` mode for the context advisor, README for launch. Product fix for `compare` (adjusted
+  estimator, interval, noise floor, switchback plan) proposed, not started.
+
+---
+
 ## 2026-11-04 (late night) — Context economics advisor (M10)
 
 **Done**
