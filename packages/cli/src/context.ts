@@ -250,3 +250,99 @@ function ago(ts: number): string {
   if (min < 48 * 60) return `${Math.round(min / 60)} h ago`;
   return `${Math.round(min / 1440)} days ago`;
 }
+
+export interface WatchState {
+  calls: number;
+  advice: CompactionPlan["now"]["advice"];
+}
+
+/**
+ * Watch mode: what to print after a new look at a live session. Prints on the first look, after
+ * `every` new calls, and whenever the advice changes. Returns null when there is nothing to say.
+ */
+export function watchUpdate(
+  r: ContextResult,
+  prev: WatchState | undefined,
+  every: number,
+): { lines: string[]; state: WatchState } | null {
+  const calls = r.ledger.calls.length;
+  const n = r.plan.now;
+  if (prev && calls - prev.calls < every && n.advice === prev.advice) return null;
+  const idle = idleNow(r.ledger);
+  const time = new Date(r.ledger.calls.at(-1)?.ts ?? Date.now()).toTimeString().slice(0, 5);
+  const lines = [
+    `${dim(time)}  call ${int(calls)} · prompt ${compact(n.ctx)} · unused ${IDLE_CALLS}+ calls: ${compact(
+      idle.tokens,
+    )} (${usd(idle.usdPerCall)} per call) · carried after last use so far ${usd(r.ledger.totals.deadUsd)}`,
+  ];
+  if (n.advice === "compact-now") {
+    lines.push(
+      warn(
+        `       → compact now: re-reading since the last compaction ${usd(n.excessUsd)} ≥ one compaction ${usd(n.thresholdUsd)}`,
+      ),
+    );
+  } else if (n.advice === "not-yet") {
+    lines.push(
+      dim(
+        `       → not yet: ${usd(n.excessUsd)} of ${usd(n.thresholdUsd)}${n.callsUntil ? `, ~${int(n.callsUntil)} calls to go` : ""}`,
+      ),
+    );
+  } else {
+    lines.push(dim("       → prompt is small; compaction would not pay off"));
+  }
+  return { lines, state: { calls, advice: n.advice } };
+}
+
+export interface WatchOptions {
+  rho?: number;
+  every: number;
+  /** Re-reads changed logs into the store. */
+  rescan: () => Promise<unknown>;
+  intervalMs?: number;
+  signal?: AbortSignal;
+}
+
+/** Follows a live session until the signal aborts. Reads logs only; changes nothing. */
+export async function watchContext(
+  store: Store,
+  adapters: Adapter[],
+  session: { id: string; title: string | null; agent: string },
+  options: WatchOptions,
+): Promise<void> {
+  out();
+  out(
+    `${bold(accent("◆ AgentPrism"))}  ${bold("watching")} ${session.title ?? session.id.slice(0, 8)}  ${dim(
+      `every ${options.every} calls, price of forgetting ${usd(options.rho ?? 0.5)} · Ctrl+C to stop · advisory: changes nothing`,
+    )}`,
+  );
+  let state: WatchState | undefined;
+  let lastSizes = "";
+  while (!options.signal?.aborted) {
+    await options.rescan();
+    // Only re-read the session when one of its files grew.
+    const sizes = store.db
+      .prepare(
+        `SELECT group_concat(path || ':' || size) AS s FROM sources
+         WHERE path IN (SELECT DISTINCT source FROM api_calls WHERE session_id = ?)`,
+      )
+      .get(session.id) as { s: string | null };
+    if (sizes.s !== lastSizes) {
+      lastSizes = sizes.s ?? "";
+      const r = await analyseContext(store, adapters, session, { rho: options.rho });
+      if (typeof r !== "string") {
+        const u = watchUpdate(r, state, options.every);
+        if (u) {
+          u.lines.forEach((l) => out(l));
+          state = u.state;
+        }
+      }
+    }
+    await new Promise<void>((resolve) => {
+      const t = setTimeout(resolve, options.intervalMs ?? 5000);
+      options.signal?.addEventListener("abort", () => {
+        clearTimeout(t);
+        resolve();
+      });
+    });
+  }
+}

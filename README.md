@@ -35,15 +35,15 @@ breaks — not from the tools or the code.
 
 ## Commands
 
-| Command                  | What you get                                                                                                                                              |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `agentprism`             | spend headline, most expensive sessions, top findings                                                                                                     |
-| `agentprism report`      | spend by project, model, day, session and prompt; cache savings; cost by token kind                                                                       |
-| `agentprism findings`    | waste detectors with evidence, estimated cost and a concrete fix for each finding                                                                         |
-| `agentprism mark <name>` | remember the moment you changed something (CLAUDE.md, habit, model)                                                                                       |
-| `agentprism compare`     | before vs after that mark, per-session medians                                                                                                            |
-| `agentprism context [s]` | context economics of a session: what the prompt carries after its last use, and when compaction pays off (advisory; `--html` writes an anonymized report) |
-| `agentprism modules`     | loaded plugins, adapters and detectors                                                                                                                    |
+| Command                  | What you get                                                                                                                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `agentprism`             | spend headline, most expensive sessions, top findings                                                                                                                                       |
+| `agentprism report`      | spend by project, model, day, session and prompt; cache savings; cost by token kind                                                                                                         |
+| `agentprism findings`    | waste detectors with evidence, estimated cost and a concrete fix for each finding                                                                                                           |
+| `agentprism mark <name>` | remember the moment you changed something (CLAUDE.md, habit, model)                                                                                                                         |
+| `agentprism compare`     | before vs after that mark, per-session medians                                                                                                                                              |
+| `agentprism context [s]` | context economics of a session: what the prompt carries after its last use, and when compaction pays off (advisory; `--html` writes an anonymized report, `--watch` follows a live session) |
+| `agentprism modules`     | loaded plugins, adapters and detectors                                                                                                                                                      |
 
 Add `--json` to any command for scripts, `--plugin ./my-plugin.mjs` to load your own modules.
 

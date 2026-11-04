@@ -19,7 +19,7 @@ import {
 } from "@agentprism/core";
 import pkg from "../package.json" with { type: "json" };
 import { printCompare } from "./compare.js";
-import { analyseContext, pickSession, printContext } from "./context.js";
+import { analyseContext, pickSession, printContext, watchContext } from "./context.js";
 import { publicReport, renderContextHtml } from "./context-html.js";
 import { printFindings } from "./findings.js";
 import { printOverview, printScan, printSpend } from "./report.js";
@@ -54,6 +54,8 @@ Options
   --no-scan            Use the database as is, do not read logs first
   --rho <usd>          context: price of forgetting per compaction (default 0.5)
   --html <file>        context: also write an anonymized HTML report
+  --watch              context: follow a live session and print advice as it grows (Ctrl+C stops)
+  --every <n>          context --watch: print after this many new calls (default 20)
   --json               Print machine-readable JSON
   -v, --version        Print the version
   -h, --help           Print this help
@@ -117,6 +119,8 @@ export async function main(argv: string[]): Promise<number> {
       json: { type: "boolean", default: false },
       rho: { type: "string" },
       html: { type: "string" },
+      watch: { type: "boolean", default: false },
+      every: { type: "string", default: "20" },
       version: { type: "boolean", short: "v", default: false },
       help: { type: "boolean", short: "h", default: false },
     },
@@ -227,6 +231,18 @@ export async function main(argv: string[]): Promise<number> {
       if (rho !== undefined && !(rho >= 0)) {
         process.stderr.write("--rho must be a number of dollars, 0 or more.\n");
         return 2;
+      }
+      if (values.watch) {
+        const every = Math.max(1, Number.parseInt(values.every, 10) || 20);
+        const stop = new AbortController();
+        process.once("SIGINT", () => stop.abort());
+        await watchContext(store, registry.adapters, session, {
+          rho,
+          every,
+          rescan: () => scan(store, registry.adapters),
+          signal: stop.signal,
+        });
+        return 0;
       }
       const r = await analyseContext(store, registry.adapters, session, { rho });
       if (typeof r === "string") {

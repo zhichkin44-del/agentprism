@@ -4,6 +4,21 @@ Newest entry on top. Each entry: what was done, what was found, what is next.
 
 ---
 
+## 2026-11-05 — Watch mode for the context advisor
+
+**Done**
+
+- `agentprism context [s] --watch [--every n]` follows a live session. It rescans every 5 s and re-reads
+  the session only when its files grew.
+- It prints one line after every n new calls, and at once when the advice changes: prompt size, content
+  unused for 50+ calls and its cost per call, and the advice.
+- `watchUpdate` is pure and tested. Costs under half a cent print as "<$0.01".
+
+**Checked:** on this live session, the first look printed "compact now" (re-reading $8.02 ≥ one
+compaction $1.75). 56 tests pass.
+
+---
+
 ## 2026-11-05 — R3 placebo study of before/after
 
 **Done**

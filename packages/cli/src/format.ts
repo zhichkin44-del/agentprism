@@ -34,7 +34,9 @@ export const pct = (part: number, whole: number): string =>
   whole > 0 ? `${((part / whole) * 100).toFixed(1)}%` : "–";
 
 export const usd = (n: number): string =>
-  `$${n.toLocaleString("en-US", { maximumFractionDigits: n >= 100 ? 0 : 2 })}`;
+  n > 0 && n < 0.005
+    ? "<$0.01"
+    : `$${n.toLocaleString("en-US", { maximumFractionDigits: n >= 100 ? 0 : 2 })}`;
 
 export const date = (ms: number | null): string =>
   ms === null ? "–" : new Date(ms).toISOString().slice(0, 10);

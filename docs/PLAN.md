@@ -90,5 +90,7 @@ Direction from the owner (2026-11-04): research first, then a technology nobody 
       exact optimum for comparison
 - [x] `agentprism context [session] [--rho] [--html]`: terminal report plus an anonymized HTML report
 - [ ] Owner labels 60 sampled pairs: precision of correction detection, gold data for the owner's voice
-- [ ] R3: placebo study for before/after
+
 - [ ] A measured price of forgetting, to replace the chosen `--rho`
+- [x] R3 placebo study (shipped `compare` not trustworthy on mixed histories; switchback design)
+- [x] `--watch`: live advice on a running session
