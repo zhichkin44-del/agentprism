@@ -10,20 +10,25 @@ leave your machine.
 
 ## Why
 
-Coding agents re-send the whole conversation on every step. On 12 days of real multi-agent work we found
-the following. Method, validation and caveats are in [docs/FINDINGS.md](docs/FINDINGS.md).
+Coding agents re-send the whole conversation on every step. On 12 days of one user's real multi-agent
+work we found the following. Costs are API-equivalent at list prices. Method, validation and caveats are
+in [docs/FINDINGS.md](docs/FINDINGS.md).
 
-- **Most of the bill is re-reading the past.** In the main chain it is about 85% of the cost; the model's
-  own answers are the smaller part. The accounting matches Claude Code's own cost records.
-- **A real part of what is re-read is no longer used.** About a fifth of the prompt cost carries blocks
-  after their last use, most of all command output. That is an upper bound.
-- **When to compact has a robust answer.** A simple rule stays within a few percent of the exact optimum
-  computed in hindsight, under every assumption about what forgetting costs. The rule: compact when the
-  excess re-reading reaches the cost of one compaction. Fixed thresholds can be several times worse.
+- **Most of the cost is sending the past again.** In the main chain that is about 85% of the cost (cache
+  reads ≈65%, cache writes ≈20%); the model's own answers are the rest. The accounting agrees with Claude
+  Code's own cost records within about 1%.
+- **A part of what is re-sent is no longer used.** By a liberal rule (high recall, precision not yet
+  measured), about a fifth of the prompt cost carries blocks after their last use, most of all command
+  output. That is an upper bound.
+- **A simple compaction rule tracks the exact optimum, if you know what forgetting costs.** The rule
+  compacts when the excess re-reading reaches the cost of one compaction, by analogy with ski-rental. In
+  simulation it stayed within 4–16% of the optimum computed in hindsight, at every assumed price of
+  forgetting from $0 to $20. Fixed thresholds were up to 3× worse.
 
-Usage counters tell you how much you spent; Claude Code's `/usage` tells you where. AgentPrism prices
-every piece of context and tells you when compaction pays off. See
-[how it compares](docs/COMPETITORS.md).
+Usage counters tell you how much you spent, and Claude Code's `/usage` tells you where.
+[LangWatch](https://langwatch.ai/blog/context-tax-when-to-compact) measured what compaction costs on a
+large history and picked a threshold. AgentPrism prices every block of context with cache prices and
+checks its compaction rule against the exact optimum. See [how it compares](docs/COMPETITORS.md).
 
 ## Install
 
@@ -90,8 +95,9 @@ Add `--json` to any command for scripts, `--plugin ./my-plugin.mjs` to load your
   the blocks that entered it (tool output, file reads, the model's text and thinking) by weights fitted
   on real logs. Each block is priced on every later call that re-reads it.
 - **Use.** A block counts as in use while later outputs reuse its rare identifiers or work on its file.
-  On cases where use is certain (an edit proves the agent had read the text) this finds 98% of them.
-- **Compaction rule.** A ski-rental rule compares accumulated excess re-reading with the cost of one
+  On cases where use is certain (an edit proves the agent had read the text) this finds 98% of them;
+  its precision is not measured yet.
+- **Compaction rule.** A rule modelled on ski-rental (no formal bound for this setting) compares accumulated excess re-reading with the cost of one
   compaction. For comparison, the exact optimum is computed by dynamic programming over the recorded
   session.
 

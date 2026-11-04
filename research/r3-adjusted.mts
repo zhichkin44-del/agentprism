@@ -12,6 +12,10 @@ import { Store } from "../packages/core/src/index.ts";
 import { costOf } from "../packages/core/src/pricing/sql.ts";
 
 const db = process.argv[2];
+// Reproducible runs: ignore everything after AGENTPRISM_UNTIL (ISO time), as the .mjs scripts do.
+const UNTIL = process.env.AGENTPRISM_UNTIL
+  ? Date.parse(process.env.AGENTPRISM_UNTIL)
+  : Number.MAX_SAFE_INTEGER;
 if (!db) throw new Error("usage: tsx research/r3-adjusted.mts <db>");
 const store = Store.open(db);
 type Turn = { day: string; y: number; x: number[] };
@@ -23,6 +27,7 @@ const rows = store.db
           FROM api_calls a2 WHERE a2.turn_id = t.id ORDER BY a2.ts LIMIT 1) AS ctx0,
        (SELECT a3.model FROM api_calls a3 WHERE a3.turn_id = t.id ORDER BY a3.ts LIMIT 1) AS model
      FROM turns t JOIN api_calls a ON a.turn_id = t.id JOIN sessions s ON s.id = t.session_id
+     WHERE t.ts <= ${UNTIL}
      GROUP BY t.id HAVING usd > 0`,
   )
   .all() as {

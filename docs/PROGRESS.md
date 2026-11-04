@@ -4,6 +4,34 @@ Newest entry on top. Each entry: what was done, what was found, what is next.
 
 ---
 
+## 2026-11-04 — Corrections after an independent review (A1–A14)
+
+**Done**
+
+- Novelty narrowed. [LangWatch](https://langwatch.ai/blog/context-tax-when-to-compact) already measured
+  rework and user corrections after 873 compactions (2.37× more corrections) and picked a threshold from
+  a token-count model. That work is now described honestly. What remains new for us:
+  - a price for every block with cache prices;
+  - an online rule checked against the exact optimum;
+  - switchback for agent workflows.
+- Wording fixed:
+  - 85% is sending the context (cache reads ≈65%, writes ≈20%);
+  - Claude Code's records agree within ~1%, not to the cent;
+  - the rule's 4–16% holds when ρ is known, on one user's 12 days;
+  - ski-rental is an analogy, not a proof;
+  - the 21% follows the liberal rule, with precision not measured;
+  - R4 is "none detected, low power", and "the product moves on" is a hypothesis;
+  - all dollars are API list prices;
+  - the work was done by agents in one day.
+- R1 table rebuilt from the script output, without counting thinking twice.
+- Reproducibility:
+  - `AGENTPRISM_UNTIL` cutoff in every research script;
+  - the snapshot `research/results/2026-11-04T0820Z.txt` (aggregates only, SHA-256 in RESEARCH);
+  - `research/README.md` explains how to regenerate it.
+- LAUNCH: publish from a clean copy without the Studio files (machine, paths, account).
+
+---
+
 ## 2026-11-04 — `compare` rebuilt after R3; switchback
 
 **Done**

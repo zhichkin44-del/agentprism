@@ -5,6 +5,11 @@ import os from "node:os";
 import path from "node:path";
 
 /** USD per million tokens: input, output, cache read, cache write 5m, cache write 1h. */
+/** Records after this moment are ignored, so a run can be reproduced later: AGENTPRISM_UNTIL=<ISO time>. */
+export const UNTIL = process.env.AGENTPRISM_UNTIL
+  ? Date.parse(process.env.AGENTPRISM_UNTIL)
+  : Infinity;
+
 export const PRICES = {
   "claude-opus-5-5": [4, 20, 0.2, 5, 8],
   "claude-sonnet-5-5": [2, 10, 0.1, 2.5, 4],
@@ -53,6 +58,7 @@ export function loadSessions() {
       if (o.isSidechain === true || !o.sessionId) continue;
       const ts = o.timestamp ? Date.parse(o.timestamp) : lastTs;
       lastTs = ts;
+      if (ts > UNTIL) continue;
       if (!["assistant", "user", "attachment", "system"].includes(o.type)) continue;
       const s =
         sessions.get(o.sessionId) ?? sessions.set(o.sessionId, { recs: [] }).get(o.sessionId);

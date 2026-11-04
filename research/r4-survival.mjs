@@ -13,7 +13,7 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { logFiles } from "./lib.mjs";
+import { logFiles, UNTIL } from "./lib.mjs";
 
 const MIN_LINE = 12;
 const sig = (text) => [
@@ -47,6 +47,7 @@ for (const f of logFiles()) {
       continue;
     }
     const ts = Date.parse(o.timestamp);
+    if (ts > UNTIL) continue;
     const s = o.sessionId;
     if (o.type === "assistant") {
       const u = o.message?.usage;

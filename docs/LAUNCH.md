@@ -20,6 +20,9 @@ The numbers in that sentence must be real (from `METRICS.md`). Before/after is t
 - [ ] Landing page (GitHub Pages) with the same story — optional for v0.1
 - [ ] Issue templates, CONTRIBUTING.md, `good first issue` labels (new adapters are perfect first issues)
 - [ ] At least one adapter beyond Claude Code if possible (widens the audience on HN)
+- [ ] Publish from a clean copy, not this working repo. Studio files (`studio.json`, `PROJECT.md`, `AGENTS.md`,
+      `GEMINI.md`) name the machine, local paths and the agent account. Drop them, then re-check the
+      README, `docs/` and `research/results/` for paths and private names.
 
 ## Channels and order
 

@@ -1,0 +1,202 @@
+# AgentPrism research snapshot — AGENTPRISM_UNTIL=2026-11-04T08:20:00Z
+# Aggregates only. Regenerate: see research/README.md
+
+## r1-calibrate
+intervals 9187 with Δ<0 1 | after a human prompt 853 with Δ<0 1
+within a turn   {"w":{"vis":1.1599,"think":1.1861,"chars":0.0403,"images":1242.15},"r2":0.336}
+at a new prompt {"w":{"vis":1.4318,"think":1.1119,"chars":0.0048,"images":2534.1601},"r2":0.28}
+totals within turns: Δ 13521190 vis 4842234 think 2083380 chars 25819959
+totals at prompts:   Δ 1047639 vis 476527 think 128521 chars 1606148
+split within turns {"w":{"vis":1.0409,"think":1.0223,"tr":0.4479,"att":0.0042,"usr":0.3885,"images":995.3709},"r2":0.97}
+split all          {"w":{"vis":1.0452,"think":1.0226,"tr":0.4473,"att":0.0041,"usr":0.3955,"images":1236.6791},"r2":0.926}
+chars: tool results 12086912 attachments 14630200 user 708995
+
+## r1-dead-context
+sessions 98, blocks 43698; main-chain prompt cost $706, output $121
+growth allocated 14.6M of measured 14.6M tokens
+
+k=1 D=20: ledger $707 = always-live $203 + used $287 + dead $218
+  recall on known uses (Edit old_string found in an earlier Read): identifiers only 208/212, with file targets 212/212
+  dead = 30.8% of prompt cost, 26.3% of main-chain spend; never used after first read (thinking excluded) $67
+  thinking                     dead   $69  used   $10  dead share 88%
+  tool_use:Bash                dead   $49  used   $43  dead share 53%
+  tool_result:Bash             dead   $40  used   $95  dead share 30%
+  tool_result:mcp              dead   $13  used    $7  dead share 65%
+  tool_use:Edit                dead    $9  used   $19  dead share 32%
+  tool_result:Read             dead    $6  used   $21  dead share 23%
+  tool_use:Write               dead    $5  used   $42  dead share 10%
+  tool_use:mcp                 dead    $5  used    $8  dead share 36%
+  user_image                   dead    $4  used    $0  dead share 98%
+  assistant_text               dead    $3  used   $23  dead share 11%
+
+k=2 D=5: ledger $707 = always-live $203 + used $77 + dead $428
+  recall on known uses (Edit old_string found in an earlier Read): identifiers only 157/212, with file targets 209/212
+  dead = 60.6% of prompt cost, 51.7% of main-chain spend; never used after first read (thinking excluded) $263
+  tool_result:Bash             dead  $119  used   $17  dead share 88%
+  tool_use:Bash                dead   $88  used    $4  dead share 95%
+  thinking                     dead   $78  used    $1  dead share 99%
+  tool_use:Write               dead   $29  used   $18  dead share 62%
+  assistant_text               dead   $22  used    $4  dead share 84%
+  tool_result:mcp              dead   $17  used    $2  dead share 89%
+  tool_use:Edit                dead   $17  used   $11  dead share 61%
+  tool_result:Read             dead   $13  used   $14  dead share 48%
+  tool_use:mcp                 dead   $12  used    $1  dead share 96%
+  tool_use:PowerShell          dead    $4  used    $0  dead share 96%
+
+k=3 D=2: ledger $707 = always-live $203 + used $37 + dead $467
+  recall on known uses (Edit old_string found in an earlier Read): identifiers only 63/212, with file targets 207/212
+  dead = 66.2% of prompt cost, 56.5% of main-chain spend; never used after first read (thinking excluded) $343
+  tool_result:Bash             dead  $132  used    $3  dead share 98%
+  tool_use:Bash                dead   $91  used    $1  dead share 99%
+  thinking                     dead   $78  used    $1  dead share 99%
+  tool_use:Write               dead   $36  used   $11  dead share 77%
+  assistant_text               dead   $26  used    $0  dead share 98%
+  tool_result:Read             dead   $20  used    $8  dead share 72%
+  tool_result:mcp              dead   $19  used    $0  dead share 99%
+  tool_use:Edit                dead   $17  used   $10  dead share 63%
+  tool_use:mcp                 dead   $13  used    $0  dead share 99%
+  tool_use:PowerShell          dead    $4  used    $0  dead share 99%
+
+## r2-compaction
+A. real compactions with full windows: 15
+   repeats of earlier reads/commands per call: before 0.011, after 0.010
+   rework per compaction ≈ 0.0 extra calls × $0.04 = $0.00
+   prompt size on the first call after a compaction: median 96K
+
+B. rework $0.00 per compaction, P = 96K
+   offline optimum                                   $ 547  compactions 66
+   never (as recorded)                               $ 827  compactions   0  ratio 1.51  worst segment 2.25
+   threshold 200K                                    $ 568  compactions  96  ratio 1.04  worst segment 1.22
+   threshold 400K                                    $ 627  compactions  22  ratio 1.14  worst segment 1.27
+   ski-rental (excess reads ≥ compaction cost)       $ 567  compactions  74  ratio 1.04  worst segment 1.21
+   ski-rental that assumes rework is free            $ 567  compactions  74  ratio 1.04  worst segment 1.21
+   ski-rental + compact before a break > 55 min      $ 563  compactions  75  ratio 1.03  worst segment 1.21
+
+B. rework $0.50 per compaction, P = 96K
+   offline optimum                                   $ 575  compactions 46
+   never (as recorded)                               $ 827  compactions   0  ratio 1.44  worst segment 2.02
+   threshold 200K                                    $ 616  compactions  96  ratio 1.07  worst segment 1.45
+   threshold 400K                                    $ 638  compactions  22  ratio 1.11  worst segment 1.24
+   ski-rental (excess reads ≥ compaction cost)       $ 595  compactions  57  ratio 1.03  worst segment 1.22
+   ski-rental that assumes rework is free            $ 604  compactions  74  ratio 1.05  worst segment 1.39
+   ski-rental + compact before a break > 55 min      $ 593  compactions  61  ratio 1.03  worst segment 1.22
+
+B. rework $2.00 per compaction, P = 96K
+   offline optimum                                   $ 630  compactions 29
+   never (as recorded)                               $ 827  compactions   0  ratio 1.31  worst segment 1.69
+   threshold 200K                                    $ 760  compactions  96  ratio 1.21  worst segment 2.14
+   threshold 400K                                    $ 671  compactions  22  ratio 1.07  worst segment 1.21
+   ski-rental (excess reads ≥ compaction cost)       $ 657  compactions  35  ratio 1.04  worst segment 1.19
+   ski-rental that assumes rework is free            $ 715  compactions  74  ratio 1.14  worst segment 1.95
+   ski-rental + compact before a break > 55 min      $ 652  compactions  39  ratio 1.04  worst segment 1.25
+
+B. rework $5.00 per compaction, P = 96K
+   offline optimum                                   $ 699  compactions 17
+   never (as recorded)                               $ 827  compactions   0  ratio 1.18  worst segment 1.42
+   threshold 200K                                    $1048  compactions  96  ratio 1.50  worst segment 3.52
+   threshold 400K                                    $ 737  compactions  22  ratio 1.05  worst segment 1.24
+   ski-rental (excess reads ≥ compaction cost)       $ 746  compactions  23  ratio 1.07  worst segment 1.19
+   ski-rental that assumes rework is free            $ 937  compactions  74  ratio 1.34  worst segment 3.07
+   ski-rental + compact before a break > 55 min      $ 763  compactions  32  ratio 1.09  worst segment 1.62
+
+B. rework $10.00 per compaction, P = 96K
+   offline optimum                                   $ 768  compactions 10
+   never (as recorded)                               $ 827  compactions   0  ratio 1.08  worst segment 1.20
+   threshold 200K                                    $1528  compactions  96  ratio 1.99  worst segment 5.82
+   threshold 400K                                    $ 847  compactions  22  ratio 1.10  worst segment 1.55
+   ski-rental (excess reads ≥ compaction cost)       $ 801  compactions  14  ratio 1.04  worst segment 1.30
+   ski-rental that assumes rework is free            $1307  compactions  74  ratio 1.70  worst segment 4.93
+   ski-rental + compact before a break > 55 min      $ 881  compactions  25  ratio 1.15  worst segment 2.23
+
+B. rework $20.00 per compaction, P = 96K
+   offline optimum                                   $ 826  compactions 1
+   never (as recorded)                               $ 827  compactions   0  ratio 1.00  worst segment 1.01
+   threshold 200K                                    $2488  compactions  96  ratio 3.01  worst segment 10.42
+   threshold 400K                                    $1067  compactions  22  ratio 1.29  worst segment 2.17
+   ski-rental (excess reads ≥ compaction cost)       $ 959  compactions  10  ratio 1.16  worst segment 1.51
+   ski-rental that assumes rework is free            $2047  compactions  74  ratio 2.48  worst segment 8.66
+   ski-rental + compact before a break > 55 min      $1108  compactions  21  ratio 1.34  worst segment 3.46
+
+## q1-forgetting
+owner messages 801; corrections (heuristic) 116 = 14.5%
+by type {"repeat":28,"forgot_context":13,"wrong":25,"overreach":60,"revert":8}
+structural check: after an interrupted turn 0/2 flagged; after a denial with feedback 0/0; exact edit undos 3, of them after a flagged correction 0
+median cost of a corrected agent turn $0.16
+around compactions (10 owner messages each side): corrections before 13/114 = 11.4%, after 22/158 = 13.9%; difference 95% CI [-5.4, 10.5] points
+  "you forgot" cues: before 0, after 3
+context <100K     turns   40  corrections  30.0%  "you forgot" 0
+context 100-300K  turns  182  corrections  18.7%  "you forgot" 5
+context 300-600K  turns  336  corrections  16.1%  "you forgot" 7
+context >600K     turns  133  corrections  12.0%  "you forgot" 1
+dataset: .agentprism/research/owner-pairs.jsonl (local, gitignored)
+strict variant: corrections 24 = 3.0%; around 28 compactions before 1/114, after 5/158; difference 95% CI [-0.9, 5.5] points
+  strict, context <100K     2.5%
+  strict, context 100-300K  5.5%
+  strict, context 300-600K  3.0%
+  strict, context >600K     2.3%
+mean cost of a corrected agent turn $0.74
+
+## r4-survival
+edits: 2258; failed/denied 32, no significant lines 5, outside git 680, never committed 29
+scored 1512 edits in 22 sessions: survived 1382 (91.4%), file gone in the next commit 0
+  undone       on    1  survival when on 0%  AUROC 0.504
+  churn        on  336  survival when on 97%  AUROC 0.416
+  failAfter    on   89  survival when on 91%  AUROC 0.501
+  ownerBroad   on  157  survival when on 94%  AUROC 0.481
+  ownerStrict  on   15  survival when on 93%  AUROC 0.499
+  interrupted  on    0  survival when on -  AUROC 0.500
+  ctx          on  925  survival when on 94%  AUROC 0.368
+  side         on   41  survival when on 90%  AUROC 0.502
+  write        on  360  survival when on 100%  AUROC 0.370
+combined, all signals: AUROC 0.728 (sessions held out), 95% CI [0.555, 0.776]
+combined, without churn and undo (owner + errors + context): AUROC 0.701 (sessions held out), 95% CI [0.529, 0.738]
+
+durability: 962 edits older than 2 days in 18 sessions, still in HEAD 689 (71.6%)
+  undone       on    1  in HEAD when on 0%  AUROC 0.502
+  churn        on  231  in HEAD when on 78%  AUROC 0.463
+  failAfter    on   59  in HEAD when on 81%  AUROC 0.485
+  ownerBroad   on  118  in HEAD when on 75%  AUROC 0.491
+  ownerStrict  on    7  in HEAD when on 86%  AUROC 0.497
+  interrupted  on    0  in HEAD when on -  AUROC 0.500
+  ctx          on  625  in HEAD when on 69%  AUROC 0.505
+  side         on   41  in HEAD when on 90%  AUROC 0.480
+  write        on  257  in HEAD when on 88%  AUROC 0.390
+combined, all signals: AUROC 0.589 (sessions held out), 95% CI [0.556, 0.721]
+combined, without churn and undo: AUROC 0.551 (sessions held out), 95% CI [0.517, 0.708]
+
+## r3-placebo
+compare() at the middle fake split: median $/prompt 0.008 → 0.168 (1906%), sessions 49 / 52
+
+all sessions: 98 sessions, 30 fake splits
+  apparent change in median cost per prompt: median 1065%, 90th pct 20009%, max 23313%
+  apparent change in median cost per session: median 1736%, 90th pct 22260%
+  permutation test p<0.05 on fake splits: 15/30 (should be ~5%)
+  injected 10% cheaper after the split: detected 15/30
+  injected 20% cheaper after the split: detected 16/30
+  injected 30% cheaper after the split: detected 15/30
+  injected 50% cheaper after the split: detected 13/30
+
+sessions with ≥ 3 prompts: 17 sessions, 30 fake splits
+  apparent change in median cost per prompt: median 5835%, 90th pct 13791%, max 13791%
+  apparent change in median cost per session: median 9974%, 90th pct 41839%
+  permutation test p<0.05 on fake splits: 10/30 (should be ~5%)
+  injected 10% cheaper after the split: detected 10/30
+  injected 20% cheaper after the split: detected 8/30
+  injected 30% cheaper after the split: detected 8/30
+  injected 50% cheaper after the split: detected 8/30
+
+## r3-adjusted
+turns 964, days 12, main project share 88%
+  fake split before day 3/12: adjusted change -34%, p = 0.17
+  fake split before day 4/12: adjusted change -19%, p = 0.52
+  fake split before day 5/12: adjusted change -31%, p = 0.11
+  fake split before day 6/12: adjusted change -34%, p = 0.03
+  fake split before day 7/12: adjusted change -23%, p = 0.23
+  fake split before day 8/12: adjusted change -20%, p = 0.30
+  fake split before day 9/12: adjusted change -22%, p = 0.24
+  fake split before day 10/12: adjusted change -23%, p = 0.31
+  fake split before day 11/12: adjusted change 1%, p = 1.00
+placebo: median |change| 30%, max 52%; p<0.05 on 1/9 fake splits
+injected 20% cheaper from day 7: estimated -39%, p = 0.11
+injected 30% cheaper from day 7: estimated -46%, p = 0.12
+injected 50% cheaper from day 7: estimated -62%, p = 0.12

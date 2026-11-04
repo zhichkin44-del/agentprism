@@ -1,8 +1,16 @@
 # Research program
 
-Started 2026-11-04. The direction is a technology nobody has, built on mathematics and algorithms. More
-reports and counters are not the goal. Papers were opened and checked on 2026-11-04; most numbers come from
-abstracts. A 2026 arXiv id may not be peer reviewed yet.
+Started 2026-11-04. The goal is a new technology built on mathematics and algorithms, not more reports and
+counters. Papers were opened and checked on 2026-11-04; most numbers come from abstracts. A 2026 arXiv id
+may not be peer reviewed yet.
+
+- **Who did the work.** AI agents ran all of it (R1–R4, Q1) on 2026-11-04, in about a day. The estimates
+  of days below are from the plan and were not needed.
+- **Units.** All dollars are API-equivalent at Anthropic list prices (API price list), not a bill.
+- **Snapshot.** Results are reproducible from the snapshot
+  [`research/results/2026-11-04T0820Z.txt`](../research/results/2026-11-04T0820Z.txt), SHA-256
+  `52ea0c47fe981d444031233bba0d4d7e91230bcbfe65bba286dc23a6714d2564`. It holds aggregates only, from
+  logs up to `AGENTPRISM_UNTIL=2026-11-04T08:20:00Z`. Without the cutoff the numbers move as the logs grow.
 
 ## What our data allows
 
@@ -14,28 +22,32 @@ one user, 12 days, about 10K calls on this machine. A second machine holds about
 
 ## What the literature leaves open
 
-| Problem                                                                            | Evidence it is open                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Cutting tokens ≠ cutting the bill.** With prompt caching, pruning can raise cost | In Claude Code, 38.4% fewer tool-output tokens gave a 6.8% higher bill. Token cut vs cost cut: r = 0.15 ([2607.12161], 2026-07)                                                                                                                                                                                                                                                                                                                   |
-| **No cache-aware policy for when to compact or reset**                             | Compaction work optimizes tokens or accuracy: observation masking halves cost ([2508.21433], 2025-08); ACON −26–54% peak tokens ([2510.00615], 2025-10); CompactionRL learns summaries but has no trigger rule ([2607.05378], 2026-07). A rate–distortion framing exists, but it notes that repeated compaction is rarely measured ([2607.08032], 2026-07). The only cache-priced optimum we found is a blog with one user ([LangWatch], 2026-08) |
-| **The price of forgetting is unmeasured**                                          | After compression, completion stays flat but retrieval calls triple ([2608.16370], 2026-08). Nobody measures the rework that follows a real compaction                                                                                                                                                                                                                                                                                            |
-| **No cache-priced measure of "dead" context**                                      | Trajectories hold useless, redundant and expired content; removing it cuts 40–60% of tokens ([2509.23586], 2025-09); a skimmer cuts 23–54% ([2601.16746], 2026-01). Attribution methods work only for QA with open models ([2411.15102])                                                                                                                                                                                                          |
-| **No causal before/after on field logs**                                           | Context-file studies disagree: +20% cost and no gain ([2602.11988], 2026-02) vs −28.6% runtime ([2601.20404], 2026-01). Single-run noise is 2–6 points ([2602.07150], 2026-02). We found no CUPED, synthetic-control or DiD work at session level for agents                                                                                                                                                                                      |
-| **No validated label-free quality score**                                          | In 18k real sessions users push back in 50% of turns, and 59% of agent code survives into commits. Neither is calibrated as a quality measure ([2604.20779], 2026-04). Failure taxonomies need manual labels ([2503.13657], 2025-03)                                                                                                                                                                                                              |
-| **Cost forecasting is weak on real sessions**                                      | Models' own predictions of their token use correlate with actuals at ≤ 0.39 ([2604.22750], 2026-04). TokenCast improves MAE, but only on benchmarks ([2609.35760], 2026-09)                                                                                                                                                                                                                                                                       |
+| Problem                                                                            | Evidence it is open                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Cutting tokens ≠ cutting the bill.** With prompt caching, pruning can raise cost | In Claude Code, 38.4% fewer tool-output tokens gave a 6.8% higher bill. Token cut vs cost cut: r = 0.15 ([2607.12161], 2026-07)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **No cache-aware policy for when to compact or reset**                             | Compaction work optimizes tokens or accuracy: observation masking halves cost ([2508.21433], 2025-08); ACON −26–54% peak tokens ([2510.00615], 2025-10); CompactionRL learns summaries but has no trigger rule ([2607.05378], 2026-07). A rate–distortion framing exists, but it notes that repeated compaction is rarely measured ([2607.08032], 2026-07). The closest practical work is the [LangWatch] blog (2026-08-02, one user, 873 compactions): a threshold sweep on a parametric cost model counted in tokens (optimum ≈220K, 314K if a compaction loses 55 steps), with cache discounts mentioned only qualitatively as we read it. No online rule, no comparison with an exact optimum, no per-block prices |
+| **The price of forgetting is barely measured**                                     | After compression, completion stays flat but retrieval calls triple ([2608.16370], 2026-08). [LangWatch] measured it on real compactions: about 28 steps of re-ingested context after each, and owner corrections in the 5 steps after a compaction at 41.9% vs a 17.7% steady-state baseline (2.37×, phrase matching, 700 transcripts, observational)                                                                                                                                                                                                                                                                                                                                                                 |
+| **No cache-priced measure of "dead" context**                                      | Trajectories hold useless, redundant and expired content; removing it cuts 40–60% of tokens ([2509.23586], 2025-09); a skimmer cuts 23–54% ([2601.16746], 2026-01). Attribution methods work only for QA with open models ([2411.15102])                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **No causal before/after on field logs**                                           | Context-file studies disagree: +20% cost and no gain ([2602.11988], 2026-02) vs −28.6% runtime ([2601.20404], 2026-01). Single-run noise is 2–6 points ([2602.07150], 2026-02). We found no CUPED, synthetic-control or DiD work at session level for agents                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| **No validated label-free quality score**                                          | In 18k real sessions users push back in 50% of turns, and 59% of agent code survives into commits. Neither is calibrated as a quality measure ([2604.20779], 2026-04). Failure taxonomies need manual labels ([2503.13657], 2025-03)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **Cost forecasting is weak on real sessions**                                      | Models' own predictions of their token use correlate with actuals at ≤ 0.39 ([2604.22750], 2026-04). TokenCast improves MAE, but only on benchmarks ([2609.35760], 2026-09)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
-## Candidates for "a technology nobody has"
+## Candidates for a new technology
 
-### C1. Cache-aware context controller with a provable bound
+### C1. Cache-aware context controller (ski-rental rule)
 
 - **Idea.** Treat "compact, reset, keep warm or carry on" as an online decision under cache prices. If
   the context grows by g per step, a compaction costs C (summary call + rewrite + rework ρ). If c_r is the
   cache-read price, the cycle is EOQ-like: N* ≈ √(2C / (c_r·g)). The remaining session length is unknown,
-  which makes it ski-rental: compact when the accumulated excess read cost reaches C. That rule is
-  2-competitive deterministically and e/(e−1) randomized. A predicted horizon makes it learning-augmented.
-  An idle gap is a second ski-rental, between a 1-hour TTL and keep-alive pings and a rebuild.
-- **Why nobody has it.** The literature optimizes tokens, not the cache-priced bill ([2607.12161]), and has
-  no trigger rule. The blog curve is offline and fitted to one user.
+  which resembles ski-rental: compact when the accumulated excess read cost reaches C.
+  - For the classic ski-rental problem that rule is 2-competitive, or e/(e−1) when randomized.
+  - For repeated compactions with a growing context we use it by analogy, without a formal proof. R2
+    measures how it does instead.
+  - An idle gap is a second ski-rental-like choice: a 1-hour TTL, keep-alive pings, or a rebuild.
+- **What we did not find elsewhere.** The literature optimizes tokens, not the cache-priced bill
+  ([2607.12161]), and has no trigger rule. [LangWatch] picks a fixed threshold from an offline sweep over
+  a token-count model. An online rule, checked against the exact optimum per session with cache prices,
+  we have not found.
 - **How to prove it.** For a recorded session the offline optimum is computable exactly: dynamic
   programming over compaction points, using measured g, measured post-compaction size, and measured rework.
   We then report each online policy's empirical competitive ratio against that optimum on real logs,
@@ -52,8 +64,10 @@ one user, 12 days, about 10K calls on this machine. A second machine holds about
   identifiers, and overlap with later outputs. Choosing what to drop is a knapsack / rate–distortion
   problem: minimize carrying cost subject to bounded loss of value. A cache rule makes it non-trivial:
   dropping a block mid-history re-writes the whole suffix, so only boundary-aligned drops are cheap.
-- **Why nobody has it.** Attribution needs model internals or open models. Pruning papers measure tokens.
-  Nobody reports the share of the _bill_ spent carrying content that is never used again.
+- **What we did not find elsewhere.** Attribution needs model internals or open models, and pruning papers
+  measure tokens. [LangWatch] measured the share of the window a step draws on, with an LLM judge on 201
+  steps: 47.5% below 50K, falling to 2.5% above 600K. That is per step and in tokens. A price for every
+  block on every call that carries it, with cache prices, we have not found.
 - **How to prove it.** Measure the dead-weight share on our logs. Validate the reuse-based value against
   leave-one-out replay on a small sample, then check that drops it picks do not raise rework.
 - **Risk.** Reuse is a proxy for use. Replay costs API money (a small, budgeted sample).
@@ -66,7 +80,7 @@ one user, 12 days, about 10K calls on this machine. A second machine holds about
   adjustment by the pre-period, synthetic control built from projects and sessions not exposed to the
   change, and pre-trend and placebo checks. Report an effect with a confidence interval and the minimum
   detectable effect: "you need N more sessions to see a 10% change".
-- **Why nobody has it.** No session-level causal method for coding agents turned up. The published
+- **What we did not find elsewhere.** No session-level causal method for coding agents turned up. The published
   studies are benchmark A/Bs that disagree with each other.
 - **How to prove it.** Run placebo marks on our past logs: fake changes must show no effect at the
   nominal rate. Then check coverage on simulated effects injected into real data.
@@ -79,7 +93,7 @@ one user, 12 days, about 10K calls on this machine. A second machine holds about
   interrupts and pushback, failing commands after edits, denials. Calibrate the combination against
   whether the code survives into commits (the git history is local). This yields cost per _useful_
   change, not cost per token.
-- **Why nobody has it.** Survival and pushback are reported descriptively ([2604.20779]), but nobody has
+- **What we did not find elsewhere.** Survival and pushback are reported descriptively ([2604.20779]), but no one has
   calibrated them into a score.
 - **How to prove it.** Predict commit survival on held-out sessions (AUROC), then check stability
   across projects.
@@ -91,7 +105,7 @@ one user, 12 days, about 10K calls on this machine. A second machine holds about
 - **Idea.** Model the remaining cost as cache-priced: the context-growth path plus a hazard model for
   the remaining steps. Conformal intervals give guaranteed coverage. Output: "this task will cost $X, 90%
   interval [$a, $b]", early enough to change course.
-- **Why nobody has it.** Benchmark-only forecasters exist ([2609.35760]); nobody offers coverage guarantees
+- **What we did not find elsewhere.** Benchmark-only forecasters exist ([2609.35760]); we found no coverage guarantees
   on real human-in-the-loop sessions.
 - **Risk.** Least unique of the five. Small n.
 - **Testable now:** partly.
@@ -106,21 +120,22 @@ one user, 12 days, about 10K calls on this machine. A second machine holds about
 | R4   | Does a label-free index predict commit survival? (C4)                                     | AUROC on held-out sessions                                             | 2–3 days |
 
 R1 and R2 together are the core candidate: a context engine that knows both the carrying cost and the
-value of every piece of context, and decides what to keep, what to move to memory and when to cut, with a
-bound. R3 is the proof machine for any later change. Nothing ships until a step shows a real effect.
+value of every piece of context, and decides what to keep, what to move to memory and when to cut. R3 is
+the proof machine for any later change. Nothing ships until a step shows a real effect.
 
 ## R1 result — dead context (2026-11-04)
 
 Scripts: `research/r1-calibrate.mjs`, `research/r1-dead-context.mjs` (they read local logs and print
-aggregates). Data: 98 main-chain sessions, 12 days. Prompt carrying cost is $707, against $121 of output.
+aggregates). Data: 98 main-chain sessions, 12 days. Prompt carrying cost is $706, against $121 of output.
+Figures are from the snapshot.
 
 **How it is measured.**
 
 1. _Sizes._ The growth of the prompt between two calls is measured exactly from usage. It is split between
-   the blocks that entered it, by weights fitted on 9,204 intervals (R² = 0.97): visible output 1.04 and
+   the blocks that entered it, by weights fitted on 9,187 intervals (R² = 0.97): visible output 1.04 and
    thinking 1.02 tokens per token; tool results 0.45 and prompts 0.40 tokens per character; attachment
    records 0.004; images ~1,100 tokens. All 14.6M tokens of growth are allocated, so the ledger adds up
-   to the real prompt cost ($709 vs $707).
+   to the real prompt cost ($707 vs $706).
 2. _Carrying cost._ A block costs its size × the exact price per prompt token of every later call that
    carried it, until the next compaction.
 3. _Use._ A block is used at call j if an output of j (or a user prompt just before it) shares at least k
@@ -130,19 +145,23 @@ aggregates). Data: 98 main-chain sessions, 12 days. Prompt carrying cost is $707
    (Edit ← the Read result holding its text), the liberal rule (k=1, D=20) finds 98% of the uses from
    identifiers alone. The middle rule finds 74%, the strict one 30%.
 
-**Result (liberal rule, the only one with validated recall).**
+**Result (liberal rule: recall checked, precision not measured).**
 
 | Part of prompt cost                               | $   | Share |
 | ------------------------------------------------- | --- | ----- |
-| Always needed: system + tools, summaries, prompts | 204 | 29%   |
-| Content, carried while still used                 | 288 | 41%   |
-| Content, carried **after its last use**           | 148 | 21%   |
-| Thinking from earlier calls (use not observable)  | 80  | 11%   |
+| Always needed: system + tools, summaries, prompts | 203 | 29%   |
+| Content, carried while still used                 | 277 | 39%   |
+| Content, carried **after its last use**           | 149 | 21%   |
+| Thinking from earlier calls (use not observable)  | 79  | 11%   |
+| Total (the ledger)                                | 707 | 100%  |
+
+The script reports thinking inside "used" ($10) and "dead" ($69); the table moves it to its own row, so
+nothing is counted twice.
 
 - Thinking stays in the context and is re-read on every call. Logs keep only its token count, so its use
   cannot be checked.
-- Dead content splits into $67 never referenced after the first read and $81 carried after a last use.
-- By source, Bash commands and their outputs carry the most: $89 dead of $228. MCP tool results are dead
+- Dead content splits into $67 never referenced after the first read and $82 carried after a last use.
+- By source, Bash commands and their outputs carry the most: $89 dead of $227. MCP tool results are dead
   65% of the time.
 - Stricter rules report 61–66% dead. They miss most known uses, so those numbers are rejected.
 
@@ -150,10 +169,15 @@ aggregates). Data: 98 main-chain sessions, 12 days. Prompt carrying cost is $707
 
 - (a) Recall was validated only on verbatim uses (Edit from Read). Use of a Bash output by meaning, without
   repeating an identifier, is invisible, which overstates dead.
-- (b) A spurious shared identifier understates dead.
+- (b) A spurious shared identifier understates dead. The liberal rule was chosen for its recall, and its
+  precision was never measured. The recall check (Edit ← Read) favours identifier matching almost by
+  construction. Measuring precision needs 50–100 hand-labelled cases.
 - (c) The oracle ignores the cache. Dropping a block in mid-history forces a re-write of everything after
-  it at write price, so only drops at a compaction or reset are cheap. The $148 is an upper bound on what
-  any memory policy can save, not a forecast.
+  it at write price, so only drops at a compaction or reset are cheap. The $149 is an upper bound, under
+  the liberal rule, on what a memory policy could save. It is not a forecast.
+- For comparison, [LangWatch] judged with an LLM which items each step draws on. Used context fell
+  to 2.5% of the window above 600K. That is a narrower notion ("used by this step"), so it is far
+  stricter than ours ("used by any later step").
 - (d) Rewinds and branches in a session are not followed.
 
 The definitive check needs replay: drop the block, re-ask the model and see whether the output changes.
@@ -179,8 +203,8 @@ That sends log content to the API, so it waits for the owner's decision.
 
 ## R2 result — when to compact (2026-11-04)
 
-Script: `research/r2-compaction.mjs`. Same data. The main chain cost $830 as recorded, which already
-includes the owner's 15 compactions, most of them manual.
+Script: `research/r2-compaction.mjs`. Same data and snapshot. The main chain cost $827 as recorded, which
+already includes the owner's 15 compactions, most of them manual.
 
 **How it is measured.**
 
@@ -198,8 +222,8 @@ includes the owner's 15 compactions, most of them manual.
   segment.
 - _Online rules._ They see only the past.
 - _Ski-rental._ After each call, add (context − P) × read price to a running "excess". Compact when
-  the excess reaches the cost of one compaction (ρ included). In the simple model with linear growth
-  this rule is at most 2× the optimum. The question is how it behaves on real sessions.
+  the excess reaches the cost of one compaction (ρ included). This mirrors classic ski-rental, where the
+  rule is at most 2× the optimum. For repeated compactions that bound is not proven, so we measure it.
 
 **Rework measured on the 15 real compactions.** It counts re-reads of files and re-runs of Bash commands
 the agent already had: 0.011 per call in the 60 calls before a compaction and 0.010 after. That is no
@@ -208,28 +232,33 @@ So ρ is swept.
 
 | Rework per compaction | Optimum | Recorded | Threshold 200K | Ski-rental | Ski-rental assuming ρ = 0 |
 | --------------------- | ------- | -------- | -------------- | ---------- | ------------------------- |
-| $0                    | $551    | 1.51×    | 1.04×          | 1.04×      | 1.04×                     |
-| $2                    | $633    | 1.31×    | 1.21×          | 1.05×      | 1.14×                     |
-| $5                    | $703    | 1.18×    | 1.50×          | 1.07×      | 1.35×                     |
-| $10                   | $772    | 1.08×    | 2.00×          | 1.04×      | 1.71×                     |
-| $20                   | $830    | 1.00×    | 3.03×          | 1.16×      | 2.49×                     |
+| $0                    | $547    | 1.51×    | 1.04×          | 1.04×      | 1.04×                     |
+| $2                    | $630    | 1.31×    | 1.21×          | 1.04×      | 1.14×                     |
+| $5                    | $699    | 1.18×    | 1.50×          | 1.07×      | 1.34×                     |
+| $10                   | $768    | 1.08×    | 1.99×          | 1.04×      | 1.70×                     |
+| $20                   | $826    | 1.00×    | 3.01×          | 1.16×      | 2.48×                     |
 
 The ratio columns are cost ÷ optimum. In the worst single segment ski-rental reaches 1.19–1.51× and
 the 200K threshold up to 10×.
 
 **What it says.**
 
-1. **The ski-rental rule is robust.** It stays within 4–16% of the exact optimum across the whole range,
-   with no tuning. It adapts on its own, from 75 compactions down to 10. Fixed thresholds are good for
-   one value of ρ and fail badly for others.
+1. **When ρ is known, the ski-rental rule holds up.** In simulation, on 12 days of one user's logs and at
+   five values of ρ, it stays within 4–16% of the exact optimum with no tuning. It adapts on its own,
+   from 74 compactions down to 10. Fixed thresholds are good for one value of ρ and fail badly for
+   others.
 2. **Long context pays off only if forgetting is expensive.** Against the optimum, the recorded schedule
    costs 51% more if compaction loses nothing, 18% more at $5 per compaction, and nothing at about $20.
    So the owner's choice is right exactly when a compaction destroys more than ~$20 of work or quality.
 3. **The rule is only as good as its estimate of ρ.** Assume ρ = 0 when it is really $10–20, and it
-   loses 1.7–2.5×. The price of forgetting is the missing measurement. Re-reads show ~0, and nobody
-   measures lost quality ([2608.16370] sees retrieval calls triple). This is where R1 meets R2. A memory
-   that keeps the blocks still in use (R1: 41% of the prompt cost is content still used) lowers ρ, and a
-   lower ρ makes compaction cheap.
+   loses 1.7–2.5×. The price of forgetting is the missing measurement here. Our re-fetch proxy shows ~0.
+   [LangWatch] measured about 28 steps of re-ingested context per compaction, a different measure from
+   ours, on 873 compactions. A study in a toy environment sees retrieval calls triple ([2608.16370]). This
+   is where R1 meets R2: a memory that keeps the blocks still in use (R1: 39% of the prompt cost) lowers
+   ρ, and a lower ρ makes compaction cheap.
+4. **Agreement with LangWatch on the threshold.** Their cost-optimal threshold is ≈220K tokens (314K with
+   55 lost steps). Our best fixed threshold at small ρ is 200K, and 400K wins once ρ reaches $5. Both
+   show that the right threshold moves with the price of forgetting. The rule finds it by itself.
 
 **Where it can lie.**
 
@@ -268,10 +297,20 @@ The mean cost of a corrected agent turn is $0.74 (median $0.16).
 
 **What it says.**
 
-1. **Compaction may raise corrections a little.** Both variants and the "you forgot" cues point the same
-   way, but no interval excludes zero. The upper bound is about +1 correction per compaction. In tokens
-   that is ρ ≈ $0.2 (point) to $0.8 (upper bound) per compaction. That is far below the ~$20 at which,
-   per R2, a long context pays for itself.
+1. **Compaction may raise corrections; we cannot tell by how much.** Both variants and the "you forgot"
+   cues point the same way, but no interval excludes zero.
+   - Our counts are too small to rule out a large effect. The strict ratio after/before is ~3.5×, from 1
+     vs 5 corrections.
+   - [LangWatch] found 41.9% vs 17.7% (2.37×) in the 5 steps after a compaction, against a steady-state
+     baseline, on 873 compactions with phrase matching.
+   - The setups differ:
+     - they had 873 compactions and we had 28 points;
+     - their window was 5 steps against a steady-state baseline, ours was 10 owner messages before and
+       after;
+     - the cue lists differ, and so do the work styles.
+   - What we can say: on this data the agent's own rework, priced in tokens, comes to ρ ≈ $0.2 (point) to
+     $0.8 (upper bound) per compaction. The owner's corrections may cost far more in attention, and we did
+     not price that.
 2. **No sign that very long context causes more corrections.** The rate does not rise with prompt size.
    Under the broad variant it even falls, most likely because long sessions are orchestration sessions
    with a different style of message.
@@ -292,8 +331,9 @@ The mean cost of a corrected agent turn is $0.74 (median $0.16).
 
 ## R4 result — can logs predict whether code survives? (2026-11-04)
 
-Script: `research/r4-survival.mjs`. Of 2,290 agent edits, 682 were outside git (notes, scratch files)
-and 32 failed or were denied. That leaves 1,566 edits in 22 sessions, in 14 Studio repositories.
+Script: `research/r4-survival.mjs`. Of 2,258 agent edits in the snapshot, 680 were outside git (notes,
+scratch files), 32 failed or were denied, and 29 were never committed. That leaves 1,512 edits in 22
+sessions, in 14 Studio repositories. Durability depends on today's HEAD, so it moves even with the cutoff.
 
 **How it is measured.**
 
@@ -312,21 +352,30 @@ and 32 failed or were denied. That leaves 1,566 edits in 22 sessions, in 14 Stud
 - _Scoring:_ AUROC of each signal and of a logistic model, with whole sessions held out (5 folds) and a
   session-level bootstrap.
 
-| Outcome                      | Base rate | Best single signal                    | Combined model, held-out sessions |
-| ---------------------------- | --------- | ------------------------------------- | --------------------------------- |
-| In the next commit           | 91.5%     | none above 0.51 in the risk direction | 0.72, CI [0.55, 0.78]             |
-| Still in HEAD after ≥ 2 days | 71.3%     | none above 0.52                       | 0.54–0.57, CI lower bound ≈ 0.51  |
+| Outcome                      | Base rate     | Best single signal                    | Combined model, held-out sessions |
+| ---------------------------- | ------------- | ------------------------------------- | --------------------------------- |
+| In the next commit           | 91.4%         | none above 0.51 in the risk direction | 0.73, CI [0.56, 0.78]             |
+| Still in HEAD after ≥ 2 days | 71.6% (n=962) | none above 0.52                       | 0.55–0.59, CI lower bound ≈ 0.52  |
 
 **What it says.**
 
-- **A negative result.** No quality signal in the logs predicts whether code lasts. That covers owner
-  corrections, failed commands, interrupts and undo. The combined "next commit" score owes its 0.72 to
-  structure, not quality: new files written whole almost always survive, and edits in long sessions survive
-  slightly more. Edits followed by an owner correction survive at least as often as others.
-- **Why.** Studio agents commit their own work right away, so "in the next commit" is nearly automatic.
-  Code that dies later dies mostly because the product moves on, not because it was a mistake.
-- **C4 is not supported on this data.** Commit survival is not a usable quality label here, and the cheap
-  signals are not a quality index. The owner's labels from Q1 are the better route to a quality measure.
+- **Nothing detected, with little power.** On this data no quality signal in the logs predicted whether
+  code lasts. That covers owner corrections, failed commands, interrupts and undo. But several signals
+  barely occur:
+  - 0 interrupts;
+  - 1 exact undo;
+  - 15 strict corrections;
+  - 18–22 sessions in all.
+
+  So "no effect" is not shown, only "none detected". The combined scores owe what they have to structure,
+  not quality: new files written whole almost always survive, and edits in long sessions survive slightly
+  more. Edits followed by an owner correction survived at least as often as others.
+
+- **A hypothesis, not a finding.** Studio agents commit their own work right away, so "in the next commit"
+  is nearly automatic. We think code that dies later mostly dies because the product moves on. These
+  logs cannot separate that from mistakes, so it was not measured.
+- **C4 is not supported on this data.** Commit survival did not work as a quality label here. The owner's
+  labels from Q1 are the better route to a quality measure.
 
 **Where it can lie.**
 
@@ -338,7 +387,7 @@ and 32 failed or were denied. That leaves 1,566 edits in 22 sessions, in 14 Stud
 ## R3 result — can a before/after comparison be trusted? (2026-11-04)
 
 Scripts: `research/r3-placebo.mts` (the shipped `compare`) and `research/r3-adjusted.mts` (a fix). Run
-them with `npx tsx <script> <db>`. Data: 99 sessions, 1,005 turns, 12 days.
+them with `npx tsx <script> <db>`. Data in the snapshot: 98 sessions, 964 turns, 12 days.
 
 **How it is measured.** The logs contain no deliberate change, so every split point is a fake "mark": a
 placebo. Anything a comparison reports at a fake mark is noise plus the natural drift of the work, and
@@ -347,8 +396,8 @@ measured by injecting a known effect: the "after" side is made 10–50% cheaper.
 
 | Method                                                                 | Apparent change at fake marks | Test flags fake marks          | Detects an injected 50% saving      |
 | ---------------------------------------------------------------------- | ----------------------------- | ------------------------------ | ----------------------------------- |
-| Shipped `compare`: median cost per prompt by session                   | median ~13×, up to 230×       | 16 of 30 (session permutation) | no better than the false-alarm rate |
-| Turns, adjusted for prompt size, model, origin, project; days permuted | −7% to −35%                   | 1 of 9                         | p ≈ 0.08 (not significant)          |
+| Shipped `compare`: median cost per prompt by session                   | median ~11×, up to 230×       | 15 of 30 (session permutation) | no better than the false-alarm rate |
+| Turns, adjusted for prompt size, model, origin, project; days permuted | median 30%, up to 52%         | 1 of 9                         | p ≈ 0.12 (not significant)          |
 
 **What it says.**
 

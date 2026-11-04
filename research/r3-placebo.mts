@@ -12,10 +12,15 @@
 import { Store, compare, median, sessionSpend } from "../packages/core/src/index.ts";
 
 const db = process.argv[2];
+// Reproducible runs: ignore everything after AGENTPRISM_UNTIL (ISO time), as the .mjs scripts do.
+const UNTIL = process.env.AGENTPRISM_UNTIL
+  ? Date.parse(process.env.AGENTPRISM_UNTIL)
+  : Number.MAX_SAFE_INTEGER;
 if (!db) throw new Error("usage: tsx research/r3-placebo.mts <db>");
 const store = Store.open(db);
 const sessions = sessionSpend(store)
   .filter((s) => s.startedAt !== null && s.calls > 0 && s.prompts > 0)
+  .filter((s) => (s.startedAt ?? 0) <= UNTIL)
   .sort((a, b) => (a.startedAt ?? 0) - (b.startedAt ?? 0));
 const big = sessions.filter((s) => s.prompts >= 3);
 
