@@ -200,6 +200,20 @@ export class RecordParser {
           durationMs: num(o.totalDuration),
           apiDurationMs: num(o.totalAPIDuration),
           toolDurationMs: num(o.totalToolDuration),
+          modelUsage: Object.entries(obj(o.modelUsage) ?? {}).flatMap(([model, raw]) => {
+            const u = obj(raw);
+            if (!u || typeof u.costUSD !== "number") return [];
+            return [
+              {
+                model,
+                inputTokens: num(u.inputTokens),
+                outputTokens: num(u.outputTokens),
+                cacheReadTokens: num(u.cacheReadInputTokens),
+                cacheWriteTokens: num(u.cacheCreationInputTokens),
+                costUsd: num(u.costUSD),
+              },
+            ];
+          }),
         });
         break;
       case "custom-title": {
@@ -231,6 +245,7 @@ export class RecordParser {
         ts: this.lastTs,
         resultChars: size.chars,
         resultImages: size.images,
+        resultHash: hashInput(r.content),
         isError: r.is_error === true,
         denial: str(o.toolDenialKind),
       });

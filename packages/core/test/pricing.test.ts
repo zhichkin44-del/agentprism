@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_PRICES, callCost, callParts, mergePrices, priceFor, spend } from "../src/index.js";
+import {
+  DEFAULT_PRICES,
+  callCost,
+  callParts,
+  mergePrices,
+  priceCheck,
+  priceFor,
+  spend,
+} from "../src/index.js";
 import { at, session, storeWith } from "./helpers.js";
 
 const tokens = (t: Partial<Parameters<typeof callCost>[1]>) => ({
@@ -52,6 +60,32 @@ describe("prices", () => {
     });
     expect(priceFor(merged, "my-model-v2")?.output).toBe(2);
     expect(priceFor(merged, "claude-opus-5-5")?.input).toBe(4);
+  });
+});
+
+describe("priceCheck", () => {
+  const reported = (model: string, costUsd: number) => ({
+    kind: "session_totals" as const,
+    sessionId: "s1",
+    modelUsage: [
+      {
+        model,
+        inputTokens: 5_000,
+        outputTokens: 1_000_000,
+        cacheReadTokens: 350_000_000,
+        cacheWriteTokens: 7_000_000,
+        costUsd,
+      },
+    ],
+  });
+
+  it("accepts Sonnet 5.5 at Claude Code's own cost and flags a 2x cache-read price", async () => {
+    // Claude Code's numbers: 0.005×2 + 1×10 + 350×0.10 + 7×4 (1h writes) = $73.01.
+    const ok = await storeWith([...session("s1").events, reported("claude-sonnet-5-5", 73.01)]);
+    expect(priceCheck(ok)).toMatchObject([{ model: "claude-sonnet-5-5", status: "ok" }]);
+
+    const wrong = await storeWith([...session("s1").events, reported("claude-sonnet-5-5", 108)]);
+    expect(priceCheck(wrong)[0]?.status).toBe("mismatch");
   });
 });
 

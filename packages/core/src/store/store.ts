@@ -48,7 +48,15 @@ export class Store {
     if (row.user_version !== 0) {
       // Pre-1.0 the database is a cache of the logs: rebuilding it is always safe.
       // Marks are the user's own data, not a cache of the logs, so they survive (table not dropped).
-      for (const t of ["sources", "sessions", "turns", "api_calls", "tool_calls", "markers"]) {
+      for (const t of [
+        "sources",
+        "sessions",
+        "turns",
+        "api_calls",
+        "tool_calls",
+        "markers",
+        "reported_usage",
+      ]) {
         this.db.exec(`DROP TABLE IF EXISTS ${t}`);
       }
     }
@@ -65,7 +73,7 @@ export class Store {
          ON CONFLICT(path) DO UPDATE SET size = excluded.size, mtime_ms = excluded.mtime_ms,
            ingested_at = excluded.ingested_at`,
       ),
-      deleteBySource: ["turns", "api_calls", "tool_calls", "markers"].map((t) =>
+      deleteBySource: ["turns", "api_calls", "tool_calls", "markers", "reported_usage"].map((t) =>
         p(`DELETE FROM ${t} WHERE source = ?`),
       ),
       upsertSession: p(
@@ -101,7 +109,12 @@ export class Store {
       ),
       toolResult: p(
         `UPDATE tool_calls SET result_ts = ?, result_chars = ?, result_images = ?, is_error = ?,
-           denial = ? WHERE id = ?`,
+           denial = ?, result_hash = ? WHERE id = ?`,
+      ),
+      reportedUsage: p(
+        `INSERT OR REPLACE INTO reported_usage (session_id, source, model, input_tokens,
+           output_tokens, cache_read_tokens, cache_write_tokens, cost_usd)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       ),
       insertMarker: p(
         `INSERT INTO markers (session_id, turn_id, source, ts, type, data) VALUES (?, ?, ?, ?, ?, ?)`,
@@ -157,6 +170,18 @@ export class Store {
           v(ev.toolDurationMs),
           ev.sessionId,
         );
+        for (const m of ev.modelUsage ?? []) {
+          s.reportedUsage.run(
+            ev.sessionId,
+            source,
+            m.model,
+            m.inputTokens,
+            m.outputTokens,
+            m.cacheReadTokens,
+            m.cacheWriteTokens,
+            m.costUsd,
+          );
+        }
         break;
       case "turn":
         s.insertTurn.run(
@@ -218,6 +243,7 @@ export class Store {
           ev.resultImages,
           v(ev.isError),
           v(ev.denial),
+          v(ev.resultHash),
           ev.toolUseId,
         );
         break;

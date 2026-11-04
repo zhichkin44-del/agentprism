@@ -7,5 +7,6 @@ export * from "./pricing/prices.js";
 export { costOf, installPricing } from "./pricing/sql.js";
 export * from "./analytics/spend.js";
 export * from "./analytics/compare.js";
+export * from "./analytics/price-check.js";
 export { coreDetectors } from "./detectors/index.js";
 export { runDetectors, type DetectorRun } from "./detectors/run.js";

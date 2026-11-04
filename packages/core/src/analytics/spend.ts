@@ -1,5 +1,6 @@
 import { COST_ARGS, costOf } from "../pricing/sql.js";
 import type { Store } from "../store/store.js";
+import { priceCheck, type PriceCheck } from "./price-check.js";
 
 export interface SpendTotals {
   usd: number;
@@ -50,6 +51,8 @@ export interface Spend {
   topTurns: TurnSpend[];
   /** Apps traced with the SDK and their agents; empty for coding-agent logs only. */
   byAgent: AgentSpend[];
+  /** Our prices against the agent's own cost records; empty when the logs have none. */
+  priceChecks: PriceCheck[];
 }
 
 export interface AgentSpend {
@@ -165,5 +168,6 @@ export function spend(store: Store, options: { top?: number; days?: number } = {
     byDay,
     topSessions: sessionSpend(store, top),
     topTurns,
+    priceChecks: priceCheck(store),
   };
 }

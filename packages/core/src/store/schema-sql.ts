@@ -1,5 +1,5 @@
 /** Bump when the schema changes; pre-1.0 a bump rebuilds the database from the logs. */
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 export const SCHEMA = `
 CREATE TABLE IF NOT EXISTS sources (
@@ -78,7 +78,22 @@ CREATE TABLE IF NOT EXISTS tool_calls (
   result_chars INTEGER,
   result_images INTEGER,
   is_error     INTEGER,
-  denial       TEXT
+  denial       TEXT,
+  result_hash  TEXT
+);
+
+-- What the agent itself counted and charged per model (Claude Code's cost-state), latest per file.
+-- Tokens and cost come from the same record, so they can check our price table.
+CREATE TABLE IF NOT EXISTS reported_usage (
+  session_id         TEXT NOT NULL,
+  source             TEXT NOT NULL,
+  model              TEXT NOT NULL,
+  input_tokens       INTEGER NOT NULL,
+  output_tokens      INTEGER NOT NULL,
+  cache_read_tokens  INTEGER NOT NULL,
+  cache_write_tokens INTEGER NOT NULL,
+  cost_usd           REAL NOT NULL,
+  PRIMARY KEY (session_id, source, model)
 );
 
 CREATE TABLE IF NOT EXISTS markers (

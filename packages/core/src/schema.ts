@@ -101,6 +101,8 @@ export interface ToolResultEvent {
   /** Text size of the result; images are counted separately, not by their base64 size. */
   resultChars: number;
   resultImages: number;
+  /** Short hash of the result content, so identical repeats can be told from polling. */
+  resultHash?: string;
   isError: boolean;
   /** Why the call was not run, e.g. "user-rejected", "permission-rule". */
   denial?: string;
@@ -128,6 +130,19 @@ export interface SessionTotalsEvent {
   durationMs?: number;
   apiDurationMs?: number;
   toolDurationMs?: number;
+  /** The agent's own per-model tokens and cost, when it reports them; used to check our prices. */
+  modelUsage?: ReportedModelUsage[];
+}
+
+/** Tokens and cost one model used, as the agent itself counted and priced them. */
+export interface ReportedModelUsage {
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  /** Not split by TTL in the agent's report. */
+  cacheWriteTokens: number;
+  costUsd: number;
 }
 
 export type AgentEvent =

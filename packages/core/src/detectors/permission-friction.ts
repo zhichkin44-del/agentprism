@@ -3,12 +3,15 @@ import { severityFor, shorten, sumCalls } from "./util.js";
 
 const MIN_EVENTS = 3;
 
-/** Denied tool calls and interrupted turns: work the agent did that the user then stopped. */
+/**
+ * Denied tool calls and interrupted turns. A denial is the user's protection working, so it is
+ * friction, not waste; only asking again for exactly what was already denied is counted as waste.
+ */
 export const permissionFriction: Detector = {
   id: "permission-friction",
   title: "Permission friction",
   description:
-    "Tool calls the user denied and turns they interrupted — work that was paid for and thrown away.",
+    "Tool calls the user denied and turns they interrupted; the agent re-asking for an identical denied call is counted as waste.",
   run({ store }) {
     const rows = store.db
       .prepare(
@@ -22,8 +25,8 @@ export const permissionFriction: Detector = {
       .all() as { sessionId: string; denials: number; interrupts: number }[];
 
     const denied = store.db.prepare(
-      `SELECT name, denial, target, call_id AS callId, turn_id AS turnId
-       FROM tool_calls WHERE session_id = ? AND denial IS NOT NULL`,
+      `SELECT name, denial, target, call_id AS callId, turn_id AS turnId, input_hash AS inputHash
+       FROM tool_calls WHERE session_id = ? AND denial IS NOT NULL ORDER BY ts`,
     );
     const findings: Finding[] = [];
     for (const r of rows) {
@@ -34,10 +37,18 @@ export const permissionFriction: Detector = {
         target: string | null;
         callId: string;
         turnId: string | null;
+        inputHash: string;
       }[];
+      const seen = new Set<string>();
+      const retried = calls.filter((c) => {
+        const key = `${c.name}\0${c.inputHash}`;
+        if (seen.has(key)) return true;
+        seen.add(key);
+        return false;
+      });
       const waste = sumCalls(
         store,
-        calls.map((c) => c.callId),
+        retried.map((c) => c.callId),
       );
       const byTool = new Map<string, number>();
       for (const c of calls) byTool.set(c.name, (byTool.get(c.name) ?? 0) + 1);
@@ -54,6 +65,9 @@ export const permissionFriction: Detector = {
             .slice(0, 3)
             .map(([name, n]) => `${name}: denied ${n}×`),
           ...calls.slice(0, 1).map((c) => `e.g. ${shorten(c.target, 60)}`),
+          ...(retried.length
+            ? [`${retried.length} identical call(s) asked again after a denial`]
+            : []),
         ],
         wastedTokens: waste.tokens,
         wastedUsd: waste.usd,

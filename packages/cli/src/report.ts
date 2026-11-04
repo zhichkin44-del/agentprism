@@ -68,10 +68,6 @@ export function printOverview(o: Overview): void {
       ["l", "r", "r", "l"],
     ),
   );
-  if (o.reportedCostUsd > 0) {
-    // cost-state is only written on some runs, so it under-reports; see docs/LOG_FORMAT.md.
-    out(dim(`  Cost recorded by Claude Code (partial): ${usd(o.reportedCostUsd)} API-equivalent`));
-  }
 
   out();
   out(bold("Projects"));
@@ -169,6 +165,20 @@ export function printSpend(s: Spend, options: { brief?: boolean } = {}): void {
       )} per prompt · ${usd(t.calls ? t.usd / t.calls : 0)} per model call`,
     ),
   );
+  if (s.priceChecks.length) {
+    const bad = s.priceChecks.filter((c) => c.status === "mismatch");
+    const ok = s.priceChecks.filter((c) => c.status === "ok").map((c) => c.model);
+    if (ok.length) out(dim(`  Prices match Claude Code's own cost records: ${ok.join(", ")}`));
+    for (const c of bad) {
+      out(
+        warn(
+          `  Price check: Claude Code charged ${usd(c.reportedUsd)} for ${c.model} tokens, our table gives ${usd(
+            c.lowUsd,
+          )}–${usd(c.highUsd)} — fix it in ~/.agentprism/prices.json`,
+        ),
+      );
+    }
+  }
   const unknown = s.byModel.filter((m) => !m.known);
   if (unknown.length) {
     out(

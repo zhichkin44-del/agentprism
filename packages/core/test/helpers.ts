@@ -74,6 +74,7 @@ export function session(id: string, project = "/work/app") {
         chars?: number;
         error?: boolean;
         denial?: string;
+        result?: string;
       },
     ) {
       const toolUseId = `${id}-t${++toolN}`;
@@ -96,6 +97,7 @@ export function session(id: string, project = "/work/app") {
         ts: ts + 1,
         resultChars: t.chars ?? 100,
         resultImages: 0,
+        resultHash: t.result,
         isError: t.error ?? false,
         denial: t.denial,
       });

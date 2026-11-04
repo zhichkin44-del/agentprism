@@ -31,9 +31,29 @@ describe("loops", () => {
     }
     const store = await storeWith(s.events);
     const [f] = await findings(store, "loops");
-    expect(f?.title).toBe("Repeated the same Bash call 3× in one turn");
+    expect(f?.title).toBe("Repeated the same Bash call 3× in one turn with the same result");
     expect(f?.wastedUsd).toBeCloseTo(costOfCall(20_000) + costOfCall(30_000));
     expect(f?.turnIds).toEqual(["t1"]);
+  });
+
+  it("does not count repeats whose result changed (watching the screen after edits)", async () => {
+    const s = session("s1").turn("t1", at(0));
+    for (const i of [1, 2, 3, 4]) {
+      const c = s.call(at(i * 10), { cacheRead: 10_000 });
+      s.tool(c, at(i * 10 + 1), {
+        name: "mcp__browser__screenshot_page",
+        hash: "same",
+        result: `frame${i}`,
+      });
+    }
+    expect(await findings(await storeWith(s.events), "loops")).toEqual([]);
+
+    const same = session("s2").turn("t2", at(0));
+    for (const i of [1, 2, 3]) {
+      const c = same.call(at(i * 10), { cacheRead: 10_000 });
+      same.tool(c, at(i * 10 + 1), { name: "Bash", hash: "status", result: "still running" });
+    }
+    expect(await findings(await storeWith(same.events), "loops")).toHaveLength(1);
   });
 
   it("ignores routine polling tools and parallel repeats in a single request", async () => {
@@ -95,21 +115,39 @@ describe("context-growth", () => {
 });
 
 describe("permission-friction", () => {
-  it("adds up denials and interrupts and charges the calls that were denied", async () => {
+  it("reports denials as friction and charges only identical calls asked again", async () => {
     const s = session("s1").turn("t1", at(0));
     const c1 = s.call(at(1), { cacheRead: 5000 });
     s.tool(c1, at(2), {
       name: "Bash",
       target: "rm -rf build",
+      hash: "rm",
       denial: "user-rejected",
       error: true,
     });
     const c2 = s.call(at(3), { cacheRead: 6000 });
-    s.tool(c2, at(4), { name: "Bash", target: "git push", denial: "user-rejected", error: true });
+    s.tool(c2, at(4), {
+      name: "Bash",
+      target: "git push",
+      hash: "push",
+      denial: "user-rejected",
+      error: true,
+    });
     s.marker("interrupt", at(5));
     const [f] = await findings(await storeWith(s.events), "permission-friction");
     expect(f?.title).toBe("2 denied tool calls and 1 interrupted turns");
-    expect(f?.wastedUsd).toBeCloseTo(costOfCall(5000) + costOfCall(6000));
+    expect(f?.wastedUsd).toBe(0);
+
+    const c3 = s.call(at(6), { cacheRead: 7000 });
+    s.tool(c3, at(7), {
+      name: "Bash",
+      target: "rm -rf build",
+      hash: "rm",
+      denial: "user-rejected",
+      error: true,
+    });
+    const [g] = await findings(await storeWith(s.events), "permission-friction");
+    expect(g?.wastedUsd).toBeCloseTo(costOfCall(7000));
   });
 });
 

@@ -4,6 +4,36 @@ Newest entry on top. Each entry: what was done, what was found, what is next.
 
 ---
 
+## 2026-11-04 (later) — Honest numbers (stage 0) and a research program
+
+**Done**
+
+- Owner's decision: the launch plan is not approved, because a what-if over past logs is not new enough.
+  The Studio's own settings stay unchanged. AgentPrism becomes a research project aimed at a new technology.
+- Sonnet 5.5 cache read fixed to $0.10/M. It is confirmed by Claude Code's `cost-state` and by Anthropic's
+  docs (0.05× input).
+- `priceCheck` compares our prices with the agent's own cost records and is shown under Spend (D24). The
+  "partial cost" line is gone.
+- Loops need the same result, since tool results are now hashed in schema v5 (D25). Denials are friction,
+  not waste (D26).
+- Two literature sweeps, 2025–2026, with links opened. `RESEARCH.md` holds the open problems, five
+  candidates (C1–C5) and the order of work R1–R4.
+
+**Found**
+
+- On real logs: spend $869, and the price check passes for all three models. Loop findings fell from 16
+  to 3, and permission waste from $3.27 to $0.
+- A blog already shows an offline compaction-threshold curve (optimum 250–450K), so our what-if prototype
+  is not new. A 2026 paper shows that in Claude Code cutting tokens can raise the bill. Both point to
+  cache-aware control as the open problem.
+
+**Next (waiting for the owner)**
+
+- Choose the research steps: R1 (dead-weight share of the bill) and R2 (offline-optimal context schedule)
+  first.
+
+---
+
 ## 2026-11-04 — Competitor check, real-log audit, what-if prototype
 
 **Done**
@@ -25,12 +55,7 @@ Newest entry on top. Each entry: what was done, what was found, what is next.
 - Usage counters (ccusage) and waste-to-CLAUDE.md tools (cctx, `/usage` + `f`) already exist. Nobody does
   what-if in dollars or forecast-vs-actual.
 
-**Next (proposed, waiting for the owner's yes)**
-
-- Stage 0: fix prices (auto-check against `cost-state`), denials and loops.
-- Stage 1: `whatif`. Stage 2: apply + mark with forecast, compare by call time.
-- Stage 3: request anatomy (MCP lever). Stage 4: launch polish.
-- Freeze SDK / M6–M8 (no edge over Langfuse and the rest).
+**Next:** proposed a launch plan around `whatif`; it was not approved (see the entry above).
 
 ---
 

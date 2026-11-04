@@ -137,3 +137,23 @@ of the original message id. Found by test while building the SDK.
 Without modules the SDK returns the provider's own promise untouched (APIPromise helpers keep working) and
 traces as a side effect. With modules it awaits the call, runs `after` modules, then records, so notes from
 guards land on the trace. Streams are observed only; `after` modules never rewrite a stream.
+
+## D24 — Prices are checked against the agent's own cost records (2026-11-04)
+
+Claude Code's `cost-state` holds per-model tokens and the cost it charged for them in one record. We price
+those tokens with our table and compare (`priceCheck`, shown under Spend). The writes are not split by TTL,
+so the check accepts a range: 5-minute writes at the base tier up to 1-hour writes at the long-prompt tier.
+Why: a hand-typed price table drifts. Sonnet 5.5 cache reads were in the table at 2× the real price, which
+overstated spend by 7% until the check found it. The old "cost recorded by Claude Code (partial)" line is
+gone. It was not comparable to our totals (it resets per process and on `/clear`).
+
+## D25 — A loop needs the same input and the same result (2026-11-04)
+
+Tool results are hashed (schema v5). A repeated identical call counts as a loop only when its result
+equals the previous one. Why: re-taking a screenshot or reloading a page after an edit returns a different
+result. That is the agent checking its work, not a loop. On real logs, loop findings fell from 16 to 3.
+
+## D26 — Denials are friction, not waste (2026-11-04)
+
+A denied tool call is the user's protection working, so its cost is not waste. Only an identical call asked
+again after a denial is waste. The permission-friction finding still reports the counts.

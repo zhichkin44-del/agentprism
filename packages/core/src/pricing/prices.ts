@@ -39,7 +39,8 @@ export const DEFAULT_PRICES: PriceTable = {
     "claude-opus-4-6": standard(5, 25),
     "claude-opus-4-5": standard(5, 25),
     "claude-opus-4-1": standard(15, 75),
-    "claude-sonnet-5-5": standard(2, 10, 0.2),
+    // Cache read $0.10, not $0.20: Claude Code's own cost-state matches to the cent only at $0.10.
+    "claude-sonnet-5-5": standard(2, 10, 0.1),
     "claude-sonnet-5": standard(2, 10),
     "claude-sonnet-4-6": standard(3, 15),
     "claude-sonnet-4-5": standard(3, 15),

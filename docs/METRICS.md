@@ -22,11 +22,11 @@ The point of the project: show measured improvement on real work. Definitions fi
 | Context growth      | cache reads of context beyond 100K, on calls whose context exceeds 200K (main chain)                                       |
 | Cache rebuilds      | cache writes ≥ 100K tokens, minus the 50K a fresh summarized session would write                                           |
 | Oversized outputs   | (result tokens − 500) × cache-read price of every later call that carried it, until compaction; ≤ session cache-read spend |
-| Loops               | full cost of the model calls that issued the 2nd+ identical tool call in a turn                                            |
+| Loops               | full cost of the model calls that issued the 2nd+ identical tool call in a turn whose result also did not change           |
 | Failing tools       | full cost of the calls behind repeated identical failures, or behind all errors in error-heavy sessions                    |
 | Repeated reads      | re-read content × cache-write price                                                                                        |
 | Rediscovered files  | first-read content × (sessions − 1) × cache-write price                                                                    |
-| Permission friction | full cost of the calls whose tool use was denied                                                                           |
+| Permission friction | full cost of the calls that asked again for an identical, already denied tool call                                         |
 | Uncached prompts    | (n − 1) × smallest prompt in the group × (input − cache-read price), minus one cache-write premium (SDK traces only)       |
 | Unstable prefix     | cache-write tokens of calls whose prefix changed from the previous call × (write − read price) (SDK traces only)           |
 | Duplicate requests  | average cost × repeats of byte-identical requests (what an exact-match cache saves) (SDK traces only)                      |
@@ -82,6 +82,11 @@ that steers many agent sessions). Data: 131 log files (463 MB), 9,790 model call
 | Fixed prefix per call                  | ~41K tokens (system 7K, built-in tools 22K, MCP 11K) ≈ $73 of cache reads    |
 | Tool error rate                        | 2.6% (307 / 12,025), 75 denials                                              |
 | First scan / re-scan                   | 1.8 s / 0.1 s inside the CLI                                                 |
+
+After the honesty fixes (D24–D26), re-run later the same day on 134 files: spend **$869**, and the price check
+passes for Opus, Sonnet and Haiku 5.5. Estimated waste is $440 (51%). Loops fell from $2.92 to $0.92
+(3 findings instead of 16), and permission friction from $3.27 to $0. The headline share is still driven by
+the context-growth upper bound ($374); see `RESEARCH.md`.
 
 **What-if prototype (auto-compact threshold, main chain, corrected prices).** Replays every call with the
 history beyond the threshold removed; after a compaction the context restarts at 96K (median of 16 real
