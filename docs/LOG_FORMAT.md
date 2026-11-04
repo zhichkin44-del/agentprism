@@ -71,6 +71,24 @@ Common fields: `uuid`, `parentUuid`, `timestamp`, `sessionId`, `cwd`, `gitBranch
   were resumed. Where it covers the whole session, our transcript-based totals match it within 0.3% for
   the main model (the rest is internal Haiku calls that never appear in the transcript). Use it as a
   cross-check, not as ground truth.
+- **`cost-state` reveals Claude Code's own price table.** Its `modelUsage[model]` has token counts and
+  `costUSD`; solving for prices across sessions (2026-11-04, v2.1.308–309, 98 sessions) gives Sonnet 5.5
+  cache reads at **$0.10/M** (0.05× input) and cache writes at the 1h rate — the Sonnet total matches to the
+  cent only with those prices. Opus 5.5 matches our table within 1%. Its totals reset per process and on
+  `/clear` (v2.1.211+), so they are far below transcript totals for long-lived sessions.
+
+## Request records (v2.1.308+, observed 2026-11-04)
+
+- `api-request` — one per model request (10,326 for 9,790 de-duplicated calls): `params` (model, betas,
+  `max_tokens`, `thinking`, `context_management`, `output_config.effort`), `querySource` (`sdk`,
+  `agent:builtin:general-purpose`, …), `shapeHash`, `tail` (blob hashes), `cacheControl` (breakpoint paths
+  with `ttl` and `scope`), `requestDigest`.
+- `api-request-shape` — keyed by `shapeHash` (73 distinct shapes in 12 days): the **full system prompt and
+  every tool definition sent** (`name`, `description`, `input_schema`). This gives the exact fixed prefix of
+  each call: system prompt, built-in tools, and each MCP server (`mcp__<server>__<tool>`). Observed average:
+  ~41K tokens per call (system 7K, built-in tools 22K, MCP ~11K).
+- `api-request-blob` — message content addressed by hash (large; the bulk of the bytes).
+- Other new metadata types: `pr-link` (`prNumber`, `prUrl`, `prRepository`), `fork-context-ref`. Skipped.
 - **Images in tool results** (screenshots, `Read` of an image) arrive as base64 inside `tool_result.content`.
   Measuring them by characters overstates them ~100× (one Read averaged 185K chars). Count images separately
   (~1,600 tokens each) and measure only text by length.

@@ -4,6 +4,36 @@ Newest entry on top. Each entry: what was done, what was found, what is next.
 
 ---
 
+## 2026-11-04 — Competitor check, real-log audit, what-if prototype
+
+**Done**
+
+- Competitor map with checked links: `COMPETITORS.md`.
+- Ran the CLI on the Studio machine's logs (131 files, 463 MB, 12 days). An independent script
+  reproduces the spend to $0.50. New snapshot in `METRICS.md`.
+- Prototype auto-compact what-if, outside the repo, that replays every call with a threshold.
+- New log facts in `LOG_FORMAT.md`: request records with the full system prompt and tool definitions, and
+  `cost-state` as a source for Claude Code's own price table.
+
+**Found**
+
+- Sonnet 5.5 cache-read price in the table is 2× too high ($0.20 vs $0.10/M by Claude Code's own
+  accounting). Spend is overstated by 7% ($916 vs $851).
+- The context-growth detector ($409) overstates realistic savings. The best compaction threshold recovers
+  ~$260–280 (30%), with a U-shaped curve.
+- Counting denials as waste is questionable. Repeated identical browser screenshots are flagged as loops.
+- Usage counters (ccusage) and waste-to-CLAUDE.md tools (cctx, `/usage` + `f`) already exist. Nobody does
+  what-if in dollars or forecast-vs-actual.
+
+**Next (proposed, waiting for the owner's yes)**
+
+- Stage 0: fix prices (auto-check against `cost-state`), denials and loops.
+- Stage 1: `whatif`. Stage 2: apply + mark with forecast, compare by call time.
+- Stage 3: request anatomy (MCP lever). Stage 4: launch polish.
+- Freeze SDK / M6–M8 (no edge over Langfuse and the rest).
+
+---
+
 ## 2026-10-23 — Repositioning + M5 SDK
 
 **Done**

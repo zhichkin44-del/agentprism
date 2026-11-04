@@ -67,6 +67,37 @@ sessions re-read up to ~1M tokens of history on every call, and resuming them af
 whole context to the cache. The behavioral fix to test first: one task per session, and a fresh session
 (from HANDOFF/CLAUDE.md) after any long break.
 
+## Snapshot 2 (2026-11-04, second machine, sessions 2026-10-23 → 2026-11-04)
+
+Not comparable with the baseline above: different machine, period and mix of work (an orchestrator session
+that steers many agent sessions). Data: 131 log files (463 MB), 9,790 model calls; Opus 5.5 / Sonnet 5.5 / Haiku 5.5.
+
+| Metric                                 | Value                                                                        |
+| -------------------------------------- | ---------------------------------------------------------------------------- |
+| Spend (API-equivalent), current table  | $916 — an independent script reproduces it to $0.50                          |
+| Spend with Sonnet 5.5 cache read fixed | **$851** (table has $0.20/M; Claude Code's own `cost-state` implies $0.10/M) |
+| Cache reads share of tokens            | 98.7%                                                                        |
+| Top 3 long-lived sessions              | ~91% of spend                                                                |
+| Estimated waste (detectors)            | $481 (52%) — context growth $409, cache rebuilds $55, oversized outputs $11  |
+| Fixed prefix per call                  | ~41K tokens (system 7K, built-in tools 22K, MCP 11K) ≈ $73 of cache reads    |
+| Tool error rate                        | 2.6% (307 / 12,025), 75 denials                                              |
+| First scan / re-scan                   | 1.8 s / 0.1 s inside the CLI                                                 |
+
+**What-if prototype (auto-compact threshold, main chain, corrected prices).** Replays every call with the
+history beyond the threshold removed; after a compaction the context restarts at 96K (median of 16 real
+compactions in these logs); each simulated compaction costs one summarizing call.
+
+| Threshold | Simulated spend | Saved      | Extra compactions |
+| --------- | --------------- | ---------- | ----------------- |
+| actual    | $806            | —          | —                 |
+| 400K      | $600            | $206 (24%) | 22                |
+| 300K      | $547            | $259 (30%) | 38                |
+| 200K      | $525            | $280 (33%) | 93                |
+| 150K      | $573            | $232 (27%) | 195               |
+
+**What it says:** the context-growth detector ($409) overstates what a real setting could save; the best
+single setting recovers ~$260–280. Not modelled yet: files re-read after a compaction, quality loss.
+
 ## After
 
 _To be filled in after the fix has been applied and a working period has passed (M4)._
