@@ -109,6 +109,56 @@ R1 and R2 together are the core candidate: a context engine that knows both the 
 value of every piece of context, and decides what to keep, what to move to memory and when to cut, with a
 bound. R3 is the proof machine for any later change. Nothing ships until a step shows a real effect.
 
+## R1 result — dead context (2026-11-04)
+
+Scripts: `research/r1-calibrate.mjs`, `research/r1-dead-context.mjs` (they read local logs and print
+aggregates). Data: 98 main-chain sessions, 12 days. Prompt carrying cost is $707, against $121 of output.
+
+**How it is measured.**
+
+1. _Sizes._ The growth of the prompt between two calls is measured exactly from usage. It is split between
+   the blocks that entered it, by weights fitted on 9,204 intervals (R² = 0.97): visible output 1.04 and
+   thinking 1.02 tokens per token; tool results 0.45 and prompts 0.40 tokens per character; attachment
+   records 0.004; images ~1,100 tokens. All 14.6M tokens of growth are allocated, so the ledger adds up
+   to the real prompt cost ($709 vs $707).
+2. _Carrying cost._ A block costs its size × the exact price per prompt token of every later call that
+   carried it, until the next compaction.
+3. _Use._ A block is used at call j if an output of j (or a user prompt just before it) shares at least k
+   identifiers that occur in no more than D blocks of the session, or targets the same file. The dead part
+   is the carrying after max(first read, last use): what an oracle memory could drop.
+4. _Validation._ Every Edit proves a use: its `old_string` had to be in context. On 212 such pairs
+   (Edit ← the Read result holding its text), the liberal rule (k=1, D=20) finds 98% of the uses from
+   identifiers alone. The middle rule finds 74%, the strict one 30%.
+
+**Result (liberal rule, the only one with validated recall).**
+
+| Part of prompt cost                               | $   | Share |
+| ------------------------------------------------- | --- | ----- |
+| Always needed: system + tools, summaries, prompts | 204 | 29%   |
+| Content, carried while still used                 | 288 | 41%   |
+| Content, carried **after its last use**           | 148 | 21%   |
+| Thinking from earlier calls (use not observable)  | 80  | 11%   |
+
+- Thinking stays in the context and is re-read on every call. Logs keep only its token count, so its use
+  cannot be checked.
+- Dead content splits into $67 never referenced after the first read and $81 carried after a last use.
+- By source, Bash commands and their outputs carry the most: $89 dead of $228. MCP tool results are dead
+  65% of the time.
+- Stricter rules report 61–66% dead. They miss most known uses, so those numbers are rejected.
+
+**Where it can lie.**
+
+- (a) Recall was validated only on verbatim uses (Edit from Read). Use of a Bash output by meaning, without
+  repeating an identifier, is invisible, which overstates dead.
+- (b) A spurious shared identifier understates dead.
+- (c) The oracle ignores the cache. Dropping a block in mid-history forces a re-write of everything after
+  it at write price, so only drops at a compaction or reset are cheap. The $148 is an upper bound on what
+  any memory policy can save, not a forecast.
+- (d) Rewinds and branches in a session are not followed.
+
+The definitive check needs replay: drop the block, re-ask the model and see whether the output changes.
+That sends log content to the API, so it waits for the owner's decision.
+
 [2607.12161]: https://arxiv.org/abs/2607.12161
 [2508.21433]: https://arxiv.org/abs/2508.21433
 [2510.00615]: https://arxiv.org/abs/2510.00615
@@ -126,3 +176,67 @@ bound. R3 is the proof machine for any later change. Nothing ships until a step 
 [2604.22750]: https://arxiv.org/abs/2604.22750
 [2609.35760]: https://arxiv.org/abs/2609.35760
 [LangWatch]: https://langwatch.ai/blog/context-tax-when-to-compact
+
+## R2 result — when to compact (2026-11-04)
+
+Script: `research/r2-compaction.mjs`. Same data. The main chain cost $830 as recorded, which already
+includes the owner's 15 compactions, most of them manual.
+
+**How it is measured.**
+
+- _Replay._ A simulated compaction runs right after a call, while the cache is warm. It costs:
+  - reading the context once;
+  - a 20K-token summary (observed `postTokens` were 17–26K);
+  - re-writing the new prefix instead of reading it (P = 96K, the median first prompt after the 15 real
+    compactions);
+  - rework ρ.
+
+  Every later call then carries (old context − P) fewer tokens: first fewer cache reads, then fewer
+  writes, so rebuilds after breaks shrink too. Real compactions stay where they were.
+
+- _Optimum._ The offline optimum is exact dynamic programming over compaction points, O(n²) per
+  segment.
+- _Online rules._ They see only the past.
+- _Ski-rental._ After each call, add (context − P) × read price to a running "excess". Compact when
+  the excess reaches the cost of one compaction (ρ included). In the simple model with linear growth
+  this rule is at most 2× the optimum. The question is how it behaves on real sessions.
+
+**Rework measured on the 15 real compactions.** It counts re-reads of files and re-runs of Bash commands
+the agent already had: 0.011 per call in the 60 calls before a compaction and 0.010 after. That is no
+measurable rework. The proxy sees only re-fetching, though, not lost quality, and 15 compactions are few.
+So ρ is swept.
+
+| Rework per compaction | Optimum | Recorded | Threshold 200K | Ski-rental | Ski-rental assuming ρ = 0 |
+| --------------------- | ------- | -------- | -------------- | ---------- | ------------------------- |
+| $0                    | $551    | 1.51×    | 1.04×          | 1.04×      | 1.04×                     |
+| $2                    | $633    | 1.31×    | 1.21×          | 1.05×      | 1.14×                     |
+| $5                    | $703    | 1.18×    | 1.50×          | 1.07×      | 1.35×                     |
+| $10                   | $772    | 1.08×    | 2.00×          | 1.04×      | 1.71×                     |
+| $20                   | $830    | 1.00×    | 3.03×          | 1.16×      | 2.49×                     |
+
+The ratio columns are cost ÷ optimum. In the worst single segment ski-rental reaches 1.19–1.51× and
+the 200K threshold up to 10×.
+
+**What it says.**
+
+1. **The ski-rental rule is robust.** It stays within 4–16% of the exact optimum across the whole range,
+   with no tuning. It adapts on its own, from 75 compactions down to 10. Fixed thresholds are good for
+   one value of ρ and fail badly for others.
+2. **Long context pays off only if forgetting is expensive.** Against the optimum, the recorded schedule
+   costs 51% more if compaction loses nothing, 18% more at $5 per compaction, and nothing at about $20.
+   So the owner's choice is right exactly when a compaction destroys more than ~$20 of work or quality.
+3. **The rule is only as good as its estimate of ρ.** Assume ρ = 0 when it is really $10–20, and it
+   loses 1.7–2.5×. The price of forgetting is the missing measurement. Re-reads show ~0, and nobody
+   measures lost quality ([2608.16370] sees retrieval calls triple). This is where R1 meets R2. A memory
+   that keeps the blocks still in use (R1: 41% of the prompt cost is content still used) lowers ρ, and a
+   lower ρ makes compaction cheap.
+
+**Where it can lie.**
+
+- (a) Rework and quality are not measured beyond re-fetching. That is why the result is a table over ρ,
+  not one number.
+- (b) P is fixed at the median 96K.
+- (c) The summary call is estimated, not logged.
+- (d) After a simulated compaction, growth is assumed to follow the recorded calls. In reality the
+  conversation would diverge.
+- (e) Latency and the user's time are ignored.

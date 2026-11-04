@@ -4,6 +4,33 @@ Newest entry on top. Each entry: what was done, what was found, what is next.
 
 ---
 
+## 2026-11-04 (evening) — R1 dead context, R2 when to compact
+
+**Done**
+
+- `research/` scripts that read local logs and print only aggregates. Results are in `RESEARCH.md`.
+- R1: a ledger of every block of context.
+  - Sizes come from measured prompt growth (fit R² = 0.97), costs from exact per-call prices.
+  - Use is inferred from shared rare identifiers, validated on 212 known uses (Edit ← Read, recall 98%).
+- R2: replay with an exact DP optimum of compaction points, online rules, and rework measured on the
+  real compactions.
+
+**Found**
+
+- 21% of prompt cost ($148 of $707) carries content after its last use. That is an oracle bound, not a
+  forecast. Thinking from earlier calls stays in context: 11% of prompt cost, and its use is invisible.
+- The ski-rental rule (compact when excess reads reach one compaction's cost) stays within 1.04–1.16× of
+  the optimum for any price of forgetting. Fixed thresholds reach 3×.
+- The recorded long-context schedule is optimal only if a compaction destroys ≥ ~$20 of work. Rework seen
+  as re-fetching is ~0, and quality loss is not measured. The price of forgetting is the missing number.
+
+**Next**
+
+- Measure the price of forgetting (quality, not just re-reads). Combine R1 + R2: a memory that keeps
+  still-used blocks lowers that price. R3 (placebo) and R4 (quality index) are still open.
+
+---
+
 ## 2026-11-04 (later) — Honest numbers (stage 0) and a research program
 
 **Done**

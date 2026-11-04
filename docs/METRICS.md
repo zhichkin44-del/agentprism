@@ -106,3 +106,17 @@ single setting recovers ~$260–280. Not modelled yet: files re-read after a com
 ## After
 
 _To be filled in after the fix has been applied and a working period has passed (M4)._
+
+## Research measurements (2026-11-04)
+
+Definitions and caveats are in `RESEARCH.md`; scripts in `research/`.
+
+| Measurement                                               | Value                                      |
+| --------------------------------------------------------- | ------------------------------------------ |
+| Prompt growth explained by output, thinking, results      | R² 0.97 (thinking stays in context, ×1.02) |
+| Prompt cost carried after a block's last use (oracle)     | 21% ($148 of $707)                         |
+| Thinking from earlier calls, share of prompt cost         | 11% ($80), use not observable              |
+| Recall of the use proxy on known uses                     | 98% (208 / 212)                            |
+| Re-fetches per call, 60 calls before / after a compaction | 0.011 / 0.010 (15 compactions)             |
+| Ski-rental rule vs exact optimum, rework $0–20            | 1.04–1.16× (worst segment ≤ 1.51×)         |
+| Recorded schedule vs optimum                              | 1.51× if forgetting is free, 1.00× at $20  |
