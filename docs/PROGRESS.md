@@ -4,6 +4,28 @@ Newest entry on top. Each entry: what was done, what was found, what is next.
 
 ---
 
+## 2026-11-04 (late) — R4 code survival (negative); research paused for review
+
+**Done**
+
+- `research/r4-survival.mjs` matches 1,566 agent edits against git: the next commit touching the file,
+  and the current HEAD for edits older than two days. It scores log signals by AUROC with sessions held
+  out.
+- A one-page summary of the research in Russian for the owner, kept outside the repo in the session notes.
+
+**Found**
+
+- 91.5% of edits are in the next commit, because agents commit their own work, and 71.3% are still in HEAD
+  after two days. No log signal predicts it: owner corrections, failed commands, interrupts and undo all
+  sit near AUROC 0.5. Candidate C4 is not supported on this data.
+
+**Next**
+
+- Waiting for the owner: label 60 pairs, and choose between an advisory context-economics prototype and
+  R3.
+
+---
+
 ## 2026-11-04 (night) — Q1 the price of forgetting by quality; owner-pair dataset
 
 **Done**

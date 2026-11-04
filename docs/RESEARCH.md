@@ -289,3 +289,48 @@ The mean cost of a corrected agent turn is $0.74 (median $0.16).
   `/compact`.
 - (c) A correction 5 messages after a compaction may be unrelated to it.
 - (d) A correction's cost in owner time is not measured.
+
+## R4 result — can logs predict whether code survives? (2026-11-04)
+
+Script: `research/r4-survival.mjs`. Of 2,290 agent edits, 682 were outside git (notes, scratch files)
+and 32 failed or were denied. That leaves 1,566 edits in 22 sessions, in 14 Studio repositories.
+
+**How it is measured.**
+
+- _An edit survives_ if at least half of its significant lines (trimmed, ≥ 12 characters) are in the
+  first later commit that touches the file (any branch).
+- _Durability:_ the same test against the current HEAD, for the 907 edits older than two days.
+- _Signals from logs:_
+  - exact undo;
+  - re-editing the same lines in the session;
+  - a failed shell command within the next 5 tool calls;
+  - the owner's next message is a correction (Q1, broad and strict);
+  - an interrupt;
+  - prompt size;
+  - subagent or main agent;
+  - Write or Edit.
+- _Scoring:_ AUROC of each signal and of a logistic model, with whole sessions held out (5 folds) and a
+  session-level bootstrap.
+
+| Outcome                      | Base rate | Best single signal                    | Combined model, held-out sessions |
+| ---------------------------- | --------- | ------------------------------------- | --------------------------------- |
+| In the next commit           | 91.5%     | none above 0.51 in the risk direction | 0.72, CI [0.55, 0.78]             |
+| Still in HEAD after ≥ 2 days | 71.3%     | none above 0.52                       | 0.54–0.57, CI lower bound ≈ 0.51  |
+
+**What it says.**
+
+- **A negative result.** No quality signal in the logs predicts whether code lasts. That covers owner
+  corrections, failed commands, interrupts and undo. The combined "next commit" score owes its 0.72 to
+  structure, not quality: new files written whole almost always survive, and edits in long sessions survive
+  slightly more. Edits followed by an owner correction survive at least as often as others.
+- **Why.** Studio agents commit their own work right away, so "in the next commit" is nearly automatic.
+  Code that dies later dies mostly because the product moves on, not because it was a mistake.
+- **C4 is not supported on this data.** Commit survival is not a usable quality label here, and the cheap
+  signals are not a quality index. The owner's labels from Q1 are the better route to a quality measure.
+
+**Where it can lie.**
+
+- (a) There are only 18–22 sessions, dominated by a few long ones, so intervals are wide.
+- (b) Some signals are almost absent (0 interrupts, 1 exact undo, 15 strict corrections).
+- (c) Line matching misses survival under reformatting.
+- (d) Survival mixes mistakes with normal evolution, and these logs cannot separate the two.

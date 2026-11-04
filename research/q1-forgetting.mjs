@@ -266,6 +266,7 @@ for (const [sessionId, events] of loadSessions()) {
           interrupted: !!p.turn.interrupted,
           denied_with_feedback: !!p.turn.deniedFeedback,
           edits_undone_after: p.undoAfter ?? 0,
+          strict_correction: !!p.strict,
           cues,
         },
         is_correction: isCorrection,

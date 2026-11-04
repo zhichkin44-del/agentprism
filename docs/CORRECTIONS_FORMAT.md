@@ -22,6 +22,7 @@ One JSON object per line:
 | `signals.denied_with_feedback`   | the owner rejected a tool call and said why                                                   |
 | `signals.edits_undone_after`     | edits of this turn that a later edit exactly reverted                                         |
 | `signals.cues`                   | the cue patterns that matched the owner message                                               |
+| `signals.strict_correction`      | the strict variant also flags it (cue in the first 160 characters, no generic "don't")        |
 | `is_correction`                  | heuristic: the owner message corrects the turn                                                |
 | `error_type`                     | any of `forgot_context`, `wrong`, `revert`, `overreach`, `repeat`, `rejection`                |
 | `context.tokens`                 | prompt size of the turn's last call                                                           |
