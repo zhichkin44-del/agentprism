@@ -335,7 +335,7 @@ and 32 failed or were denied. That leaves 1,566 edits in 22 sessions, in 14 Stud
 - (c) Line matching misses survival under reformatting.
 - (d) Survival mixes mistakes with normal evolution, and these logs cannot separate the two.
 
-## R3 result — can a before/after comparison be trusted? (2026-11-05)
+## R3 result — can a before/after comparison be trusted? (2026-11-04)
 
 Scripts: `research/r3-placebo.mts` (the shipped `compare`) and `research/r3-adjusted.mts` (a fix). Run
 them with `npx tsx <script> <db>`. Data: 99 sessions, 1,005 turns, 12 days.

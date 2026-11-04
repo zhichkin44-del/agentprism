@@ -95,3 +95,4 @@ Direction from the owner (2026-11-04): research first, then a technology nobody 
 - [x] R3 placebo study (shipped `compare` not trustworthy on mixed histories; switchback design)
 - [x] `--watch`: live advice on a running session
 - [x] `compare` rebuilt: adjusted effect, interval, noise floor, verdict; `switchback` schedules (D29)
+- [ ] A real two-week switchback on one change (when the owner changes a context setting)

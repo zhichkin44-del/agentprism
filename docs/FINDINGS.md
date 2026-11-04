@@ -55,7 +55,7 @@ AgentPrism plans such a schedule (`agentprism switchback`) and analyses it from 
 estimator. The design itself is standard in marketplace experiments. Applying it to coding-agent
 workflows, measured from the agent's own logs, we have not found anywhere.
 
-- _How we checked._ Web searches on 2026-11-05 for switchback experiments with coding agents, Claude Code
+- _How we checked._ Web searches on 2026-11-04 for switchback experiments with coding agents, Claude Code
   or AI agents, plus a 2025–2026 literature sweep on 2026-11-04 for causal before/after methods on
   agent logs (CUPED, difference-in-differences, synthetic control).
 - _What we did find._ A general tutorial on switchback designs for LLM-platform features, on synthetic

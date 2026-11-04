@@ -89,7 +89,7 @@ Common fields: `uuid`, `parentUuid`, `timestamp`, `sessionId`, `cwd`, `gitBranch
   ~41K tokens per call (system 7K, built-in tools 22K, MCP ~11K).
 - `api-request-blob` — message content addressed by hash (large; the bulk of the bytes).
 - Other new metadata types: `pr-link` (`prNumber`, `prUrl`, `prRepository`), `fork-context-ref`, `tools-used`
-  (seen from 2026-11-05). Skipped.
+  (seen from 2026-11-04). Skipped.
 - **Images in tool results** (screenshots, `Read` of an image) arrive as base64 inside `tool_result.content`.
   Measuring them by characters overstates them ~100× (one Read averaged 185K chars). Count images separately
   (~1,600 tokens each) and measure only text by length.

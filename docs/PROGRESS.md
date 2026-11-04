@@ -4,7 +4,7 @@ Newest entry on top. Each entry: what was done, what was found, what is next.
 
 ---
 
-## 2026-11-05 — `compare` rebuilt after R3; switchback
+## 2026-11-04 — `compare` rebuilt after R3; switchback
 
 **Done**
 
@@ -32,7 +32,7 @@ Newest entry on top. Each entry: what was done, what was found, what is next.
 
 ---
 
-## 2026-11-05 — README for launch
+## 2026-11-04 — README for launch
 
 **Done:** README rewritten around context economics. It covers the findings with numbers that hold up,
 install, quick start with real anonymized terminal output, a snapshot of the HTML report
@@ -41,7 +41,7 @@ old "~60% waste from session length" claim is gone: R2 showed it was an inflated
 
 ---
 
-## 2026-11-05 — Watch mode for the context advisor
+## 2026-11-04 — Watch mode for the context advisor
 
 **Done**
 
@@ -56,7 +56,7 @@ compaction $1.75). 56 tests pass.
 
 ---
 
-## 2026-11-05 — R3 placebo study of before/after
+## 2026-11-04 — R3 placebo study of before/after
 
 **Done**
 

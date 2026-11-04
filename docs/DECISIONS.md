@@ -172,7 +172,7 @@ be useful, and reports are meant to be shown to other people.
 `docs/FINDINGS.md` is the one-page summary of the research, for the owner and a future site page. The repo is
 English-only (D6), so the Russian original lives in the Studio's session notes, outside git.
 
-## D29 — `compare` reports an adjusted effect with an honest verdict (2026-11-05)
+## D29 — `compare` reports an adjusted effect with an honest verdict (2026-11-04)
 
 The per-session medians failed a placebo test (R3), so they stay in the table as description only. The
 verdict comes from a turn-level regression of log cost per turn. It adjusts for prompt size at the
