@@ -240,3 +240,52 @@ the 200K threshold up to 10×.
 - (d) After a simulated compaction, growth is assumed to follow the recorded calls. In reality the
   conversation would diverge.
 - (e) Latency and the user's time are ignored.
+
+## Q1 result — the price of forgetting, measured by quality (2026-11-04)
+
+Scripts: `research/q1-forgetting.mjs` and `research/q1-review-sample.mjs`. The dataset format is in
+`CORRECTIONS_FORMAT.md`; the dataset itself stays local.
+
+**How it is measured.** There are 801 owner messages; messages from other sessions, notifications and
+command output are excluded. Each one is paired with the agent turn before it. A message is classified
+as a correction by cues in Russian and English, in two variants:
+
+- _broad_: any cue anywhere in the message;
+- _strict_: the cue sits in the first 160 characters, and generic "не нужно / don't / stop" do not count.
+
+Then the correction rates of the 10 owner messages before and after each compaction are compared, 28
+compaction points in all (overlapping windows counted once). Rates are also compared by prompt size.
+
+| Measure                                            | Broad                | Strict                 |
+| -------------------------------------------------- | -------------------- | ---------------------- |
+| Corrections among owner messages                   | 14.5% (116)          | 3.0% (24)              |
+| Before → after a compaction                        | 11.4% → 13.9%        | 0.9% → 3.2%            |
+| Difference, 95% CI                                 | [−5.4, +10.5] points | [−0.9, +5.5] points    |
+| "You forgot" cues before → after                   | 0 → 3                |                        |
+| By prompt size <100K / 100–300K / 300–600K / >600K | 30 / 19 / 16 / 12%   | 2.5 / 5.5 / 3.0 / 2.3% |
+
+The mean cost of a corrected agent turn is $0.74 (median $0.16).
+
+**What it says.**
+
+1. **Compaction may raise corrections a little.** Both variants and the "you forgot" cues point the same
+   way, but no interval excludes zero. The upper bound is about +1 correction per compaction. In tokens
+   that is ρ ≈ $0.2 (point) to $0.8 (upper bound) per compaction. That is far below the ~$20 at which,
+   per R2, a long context pays for itself.
+2. **No sign that very long context causes more corrections.** The rate does not rise with prompt size.
+   Under the broad variant it even falls, most likely because long sessions are orchestration sessions
+   with a different style of message.
+3. **The real trade-off is the owner's attention, not tokens.** At ρ ≈ $0.5 the ski-rental rule makes
+   about 58 compactions in 12 days. It saves ~$250 API-equivalent at the cost of about 15 extra owner
+   corrections (upper bound ~60). Whether that is worth it is the owner's call; the measurement makes the
+   price visible.
+
+**Where it can lie.**
+
+- (a) The classifier is not validated. Broad and strict differ 5×, and structural signals are too rare to
+  check it (2 interrupts, 0 denials with feedback, 3 exact undos). The labeling sheet (60 pairs, local)
+  closes this once the owner marks it.
+- (b) There are only 28 compaction points, and some are prompt drops from resumed sessions, not
+  `/compact`.
+- (c) A correction 5 messages after a compaction may be unrelated to it.
+- (d) A correction's cost in owner time is not measured.

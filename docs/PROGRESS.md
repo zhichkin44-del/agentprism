@@ -4,6 +4,33 @@ Newest entry on top. Each entry: what was done, what was found, what is next.
 
 ---
 
+## 2026-11-04 (night) — Q1 the price of forgetting by quality; owner-pair dataset
+
+**Done**
+
+- `research/q1-forgetting.mjs` pairs each of 801 owner messages with the agent turn before it and
+  classifies corrections (broad and strict variants). It compares rates around 28 compaction points and
+  across prompt sizes.
+- Reusable local dataset `.agentprism/research/owner-pairs.jsonl` (gitignored) in the format
+  `CORRECTIONS_FORMAT.md`. It is also the training data for the planned "owner's voice". A local labeling
+  sheet holds 60 sampled pairs.
+
+**Found**
+
+- Corrections may rise slightly after a compaction (strict 0.9% → 3.2%, "you forgot" 0 → 3), but no
+  interval excludes zero. In tokens the price of forgetting is ≈ $0.2–0.8 per compaction, far below the
+  ~$20 at which a long context pays off. The real cost is the owner's attention: ~15 extra corrections in
+  12 days (upper bound ~60) against ~$250 API-equivalent saved.
+- The rate of corrections does not grow with prompt size.
+- The classifier is unvalidated (broad and strict differ 5×). The owner's labels are needed.
+
+**Next**
+
+- The owner labels the sheet, which gives precision and recall, and gold data for the owner's voice.
+- R3 (placebo) and R4 (quality index on git) are still open.
+
+---
+
 ## 2026-11-04 (evening) — R1 dead context, R2 when to compact
 
 **Done**

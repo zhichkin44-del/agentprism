@@ -111,12 +111,15 @@ _To be filled in after the fix has been applied and a working period has passed 
 
 Definitions and caveats are in `RESEARCH.md`; scripts in `research/`.
 
-| Measurement                                               | Value                                      |
-| --------------------------------------------------------- | ------------------------------------------ |
-| Prompt growth explained by output, thinking, results      | R² 0.97 (thinking stays in context, ×1.02) |
-| Prompt cost carried after a block's last use (oracle)     | 21% ($148 of $707)                         |
-| Thinking from earlier calls, share of prompt cost         | 11% ($80), use not observable              |
-| Recall of the use proxy on known uses                     | 98% (208 / 212)                            |
-| Re-fetches per call, 60 calls before / after a compaction | 0.011 / 0.010 (15 compactions)             |
-| Ski-rental rule vs exact optimum, rework $0–20            | 1.04–1.16× (worst segment ≤ 1.51×)         |
-| Recorded schedule vs optimum                              | 1.51× if forgetting is free, 1.00× at $20  |
+| Measurement                                               | Value                                        |
+| --------------------------------------------------------- | -------------------------------------------- |
+| Prompt growth explained by output, thinking, results      | R² 0.97 (thinking stays in context, ×1.02)   |
+| Prompt cost carried after a block's last use (oracle)     | 21% ($148 of $707)                           |
+| Thinking from earlier calls, share of prompt cost         | 11% ($80), use not observable                |
+| Recall of the use proxy on known uses                     | 98% (208 / 212)                              |
+| Re-fetches per call, 60 calls before / after a compaction | 0.011 / 0.010 (15 compactions)               |
+| Ski-rental rule vs exact optimum, rework $0–20            | 1.04–1.16× (worst segment ≤ 1.51×)           |
+| Recorded schedule vs optimum                              | 1.51× if forgetting is free, 1.00× at $20    |
+| Owner messages flagged as corrections (broad / strict)    | 14.5% / 3.0% of 801 (classifier unvalidated) |
+| Corrections before → after a compaction (strict)          | 0.9% → 3.2%, CI [−0.9, +5.5] points          |
+| Price of forgetting in tokens per compaction              | ≈ $0.2 (upper ≈ $0.8)                        |

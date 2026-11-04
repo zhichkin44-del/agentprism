@@ -105,7 +105,15 @@ export function loadSessions() {
         const c = o.message?.content;
         if (typeof c === "string") {
           const kind = o.isCompactSummary ? "compact_summary" : o.isMeta ? "meta" : "user_prompt";
-          events.push({ t: "block", kind, text: c, ts });
+          events.push({
+            t: "block",
+            kind,
+            text: c,
+            ts,
+            origin: o.origin?.kind,
+            uuid: o.uuid,
+            cwd: o.cwd,
+          });
         } else
           for (const b of c ?? []) {
             if (b.type === "tool_result") {
@@ -126,13 +134,17 @@ export function loadSessions() {
                 text,
                 images,
                 ts,
+                denial: o.toolDenialKind,
               });
             } else if (b.type === "text") {
               events.push({
                 t: "block",
-                kind: o.isCompactSummary ? "compact_summary" : "user_prompt",
+                kind: o.isCompactSummary ? "compact_summary" : o.isMeta ? "meta" : "user_prompt",
                 text: b.text,
                 ts,
+                origin: o.origin?.kind,
+                uuid: o.uuid,
+                cwd: o.cwd,
               });
             } else if (b.type === "image") {
               events.push({ t: "block", kind: "user_image", text: "", images: 1, ts });
