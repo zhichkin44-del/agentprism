@@ -4,6 +4,15 @@ Newest entry on top. Each entry: what was done, what was found, what is next.
 
 ---
 
+## 2026-11-05 — README for launch
+
+**Done:** README rewritten around context economics. It covers the findings with numbers that hold up,
+install, quick start with real anonymized terminal output, a snapshot of the HTML report
+(`docs/assets/context-report.jpg`), how it works, honest limits (including `compare`) and privacy. The
+old "~60% waste from session length" claim is gone: R2 showed it was an inflated upper bound.
+
+---
+
 ## 2026-11-05 — Watch mode for the context advisor
 
 **Done**
