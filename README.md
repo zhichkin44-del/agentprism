@@ -15,15 +15,18 @@ work we found the following. Costs are API-equivalent at list prices. Method, va
 in [docs/FINDINGS.md](docs/FINDINGS.md).
 
 - **Most of the cost is sending the past again.** In the main chain that is about 85% of the cost (cache
-  reads ≈65%, cache writes ≈20%); the model's own answers are the rest. The accounting agrees with Claude
-  Code's own cost records within about 1%.
-- **A part of what is re-sent is no longer used.** By a liberal rule (high recall, precision not yet
-  measured), about a fifth of the prompt cost carries blocks after their last use, most of all command
-  output. That is an upper bound.
+  reads ≈65%, cache writes ≈20%); the model's own answers are the rest. Claude Code's own cost for the
+  same tokens falls inside our price bounds for every model. The bounds are a range because the logs do
+  not say whether a cache write was billed at the 5-minute or 1-hour rate.
+- **A part of what is re-sent is no longer used.** By a liberal rule, about a fifth of the prompt cost
+  carries blocks after their last use, most of all command output. That is an upper bound. The rule
+  finds 98% of known uses, but that check is nearly built in: it matches identifiers, and so do the
+  known uses (an edit's text found in an earlier read). Its precision is not measured yet.
 - **A simple compaction rule tracks the exact optimum, if you know what forgetting costs.** The rule
   compacts when the excess re-reading reaches the cost of one compaction, by analogy with ski-rental. In
   simulation it stayed within 4–16% of the optimum computed in hindsight, at every assumed price of
-  forgetting from $0 to $20. Fixed thresholds were up to 3× worse.
+  forgetting from $0 to $20, when the rule was given that price. Given the wrong price (say $0 when it
+  is $20), it lost up to 2.5×. Fixed thresholds were up to 3× worse.
 
 Usage counters tell you how much you spent, and Claude Code's `/usage` tells you where.
 [LangWatch](https://langwatch.ai/blog/context-tax-when-to-compact) measured what compaction costs on a

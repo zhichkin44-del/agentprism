@@ -22,7 +22,9 @@ The numbers in that sentence must be real (from `METRICS.md`). Before/after is t
 - [ ] At least one adapter beyond Claude Code if possible (widens the audience on HN)
 - [ ] Publish from a clean copy, not this working repo. Studio files (`studio.json`, `PROJECT.md`, `AGENTS.md`,
       `GEMINI.md`) name the machine, local paths and the agent account. Drop them, then re-check the
-      README, `docs/` and `research/results/` for paths and private names.
+      README, `docs/` and `research/results/` for paths and private names. `studio.json` (machine
+      `dev-machine`, local path, `updated_by`) lives only in the private repository and its branches. It never
+      goes into the public branch or repository.
 
 ## Channels and order
 

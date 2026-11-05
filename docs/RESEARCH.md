@@ -4,12 +4,12 @@ Started 2026-11-04. The goal is a new technology built on mathematics and algori
 counters. Papers were opened and checked on 2026-11-04; most numbers come from abstracts. A 2026 arXiv id
 may not be peer reviewed yet.
 
-- **Who did the work.** AI agents ran all of it (R1–R4, Q1) on 2026-11-04, in about a day. The estimates
-  of days below are from the plan and were not needed.
+- **Who did the work.** AI agents ran all of it (R1–R4, Q1) on 2026-11-04, in about a day.
 - **Units.** All dollars are API-equivalent at Anthropic list prices (API price list), not a bill.
 - **Snapshot.** Results are reproducible from the snapshot
   [`research/results/2026-11-04T0820Z.txt`](../research/results/2026-11-04T0820Z.txt), SHA-256
-  `52ea0c47fe981d444031233bba0d4d7e91230bcbfe65bba286dc23a6714d2564`. It holds aggregates only, from
+  `f65924204d33c28c701dac9f9400063ae5b44c8552ec482a5b57ac1055ce8b1a` (r0-spend added on 2026-11-05). It
+  holds aggregates only, from
   logs up to `AGENTPRISM_UNTIL=2026-11-04T08:20:00Z`. Without the cutoff the numbers move as the logs grow.
 
 ## What our data allows
@@ -112,12 +112,12 @@ one user, 12 days, about 10K calls on this machine. A second machine holds about
 
 ## Order of work (each step ends with numbers on our logs)
 
-| Step | Question                                                                                  | Output                                                                 | Estimate |
-| ---- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | -------- |
-| R1   | How much of the bill is spent carrying dead context? (C2 measurement)                     | dead-weight share by block type, cache-priced                          | 2–3 days |
-| R2   | What is the offline-optimal context schedule, and how close are simple online rules? (C1) | DP optimum, competitive ratios, measured rework after real compactions | 2–3 days |
-| R3   | Can a before/after be trusted at our sample size? (C3)                                    | placebo false-positive rate, minimum detectable effect                 | 1–2 days |
-| R4   | Does a label-free index predict commit survival? (C4)                                     | AUROC on held-out sessions                                             | 2–3 days |
+| Step | Question                                                                                  | Output                                                                 |
+| ---- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| R1   | How much of the bill is spent carrying dead context? (C2 measurement)                     | dead-weight share by block type, cache-priced                          |
+| R2   | What is the offline-optimal context schedule, and how close are simple online rules? (C1) | DP optimum, competitive ratios, measured rework after real compactions |
+| R3   | Can a before/after be trusted at our sample size? (C3)                                    | placebo false-positive rate, minimum detectable effect                 |
+| R4   | Does a label-free index predict commit survival? (C4)                                     | AUROC on held-out sessions                                             |
 
 R1 and R2 together are the core candidate: a context engine that knows both the carrying cost and the
 value of every piece of context, and decides what to keep, what to move to memory and when to cut. R3 is

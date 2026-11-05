@@ -4,6 +4,22 @@ Newest entry on top. Each entry: what was done, what was found, what is next.
 
 ---
 
+## 2026-11-05 — Second pass after the re-check
+
+- **A5.** New `research/r0-spend.mjs`. Its output is appended to the snapshot, which has a new SHA-256 in
+  RESEARCH. It shows the main-chain split: prompt 85.4%, cache reads 65.8%, writes 19.6%.
+  - "Within ~1%" did not hold on today's `cost-state` records. Claude Code's cost lies inside our 5m…1h
+    write bounds for every model; Haiku only counting its long-prompt tier.
+  - Docs now say "inside our price bounds".
+- **A1.** COMPETITORS lists LangWatch, and the "nobody offers it" claim is replaced by a narrow list of
+  what we did not find.
+- **A6.** README notes the 2.5× loss when the rule is given the wrong price of forgetting.
+- **A8.** README and FINDINGS say the recall check is nearly built in.
+- **A11.** The estimates column is gone from RESEARCH.
+- **A13.** LAUNCH says `studio.json` stays in the private repository only.
+
+---
+
 ## 2026-11-04 — Corrections after an independent review (A1–A14)
 
 **Done**

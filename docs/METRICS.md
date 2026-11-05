@@ -111,22 +111,24 @@ _To be filled in after the fix has been applied and a working period has passed 
 
 Definitions and caveats are in `RESEARCH.md`; scripts in `research/`.
 
-| Measurement                                                 | Value                                                    |
-| ----------------------------------------------------------- | -------------------------------------------------------- |
-| Prompt growth explained by output, thinking, results        | R² 0.97 (thinking stays in context, ×1.02)               |
-| Prompt cost carried after a block's last use (oracle)       | 21% ($149 of $706), liberal rule, precision not measured |
-| Thinking from earlier calls, share of prompt cost           | 11% ($79), use not observable                            |
-| Recall of the use proxy on known uses                       | 98% (208 / 212)                                          |
-| Re-fetches per call, 60 calls before / after a compaction   | 0.011 / 0.010 (15 compactions)                           |
-| Ski-rental rule vs exact optimum, rework $0–20              | 1.04–1.16× (worst segment ≤ 1.51×)                       |
-| Recorded schedule vs optimum                                | 1.51× if forgetting is free, 1.00× at $20                |
-| Owner messages flagged as corrections (broad / strict)      | 14.5% / 3.0% of 801 (classifier unvalidated)             |
-| Corrections before → after a compaction (strict)            | 0.9% → 3.2%, CI [−0.9, +5.5] points                      |
-| Agent rework from extra corrections, tokens, per compaction | ≈ $0.2 (upper ≈ $0.8); owner attention not priced        |
-| Agent edits in the next commit / still in HEAD after 2 days | 91.4% of 1,512 / 71.6% of 962                            |
-| Log signals predicting survival (AUROC, held-out sessions)  | ≤ 0.59 for durability (CI lower ≈ 0.52); low power       |
-| Shipped `compare` at fake marks (placebo)                   | apparent change median ~11×; 15/30 flagged               |
-| Adjusted turn-level estimator at fake marks                 | median 30%, max 52%; 1/9 flagged; 50% not detectable     |
+| Measurement                                                 | Value                                                        |
+| ----------------------------------------------------------- | ------------------------------------------------------------ |
+| Prompt growth explained by output, thinking, results        | R² 0.97 (thinking stays in context, ×1.02)                   |
+| Prompt cost carried after a block's last use (oracle)       | 21% ($149 of $706), liberal rule, precision not measured     |
+| Thinking from earlier calls, share of prompt cost           | 11% ($79), use not observable                                |
+| Recall of the use proxy on known uses                       | 98% (208 / 212)                                              |
+| Re-fetches per call, 60 calls before / after a compaction   | 0.011 / 0.010 (15 compactions)                               |
+| Ski-rental rule vs exact optimum, rework $0–20              | 1.04–1.16× (worst segment ≤ 1.51×)                           |
+| Recorded schedule vs optimum                                | 1.51× if forgetting is free, 1.00× at $20                    |
+| Owner messages flagged as corrections (broad / strict)      | 14.5% / 3.0% of 801 (classifier unvalidated)                 |
+| Corrections before → after a compaction (strict)            | 0.9% → 3.2%, CI [−0.9, +5.5] points                          |
+| Agent rework from extra corrections, tokens, per compaction | ≈ $0.2 (upper ≈ $0.8); owner attention not priced            |
+| Agent edits in the next commit / still in HEAD after 2 days | 91.4% of 1,512 / 71.6% of 962                                |
+| Log signals predicting survival (AUROC, held-out sessions)  | ≤ 0.59 for durability (CI lower ≈ 0.52); low power           |
+| Shipped `compare` at fake marks (placebo)                   | apparent change median ~11×; 15/30 flagged                   |
+| Adjusted turn-level estimator at fake marks                 | median 30%, max 52%; 1/9 flagged; 50% not detectable         |
+| Cost split, main chain                                      | prompt 85.4% (cache reads 65.8%, writes 19.6%), output 14.6% |
+| Claude Code's cost-state vs our prices, same tokens         | inside our 5m…1h (and Haiku long-tier) bounds, all models    |
 
 ## Before/after (`compare`, D29)
 

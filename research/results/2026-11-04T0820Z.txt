@@ -200,3 +200,14 @@ placebo: median |change| 30%, max 52%; p<0.05 on 1/9 fake splits
 injected 20% cheaper from day 7: estimated -39%, p = 0.11
 injected 30% cheaper from day 7: estimated -46%, p = 0.12
 injected 50% cheaper from day 7: estimated -62%, p = 0.12
+
+## r0-spend (added 2026-11-05 with the same cutoff)
+A. Cost split (API-equivalent, list prices)
+  main chain: 9301 calls, $827 — sending the prompt 85.4% (cache reads 65.8%, cache writes 19.6%, input 0.0%), output 14.6%
+  all calls : 10187 calls, $875 — sending the prompt 84.7% (cache reads 64.2%, cache writes 20.5%, input 0.0%), output 15.3%
+
+B. Our prices vs Claude Code's own cost-state records (same tokens)
+  claude-sonnet-5-5   22 records: Claude Code $94.56; ours $84.04 (writes 5m, -11.1%) … $98.80 (writes 1h, 4.5%) → inside our bounds
+  claude-opus-5-5     15 records: Claude Code $514.34; ours $485.10 (writes 5m, -5.7%) … $520.30 (writes 1h, 1.2%) → inside our bounds
+  claude-haiku-5-5    73 records: Claude Code $5.32; ours $1.98 (writes 5m, -62.9%) … $2.14 (writes 1h, -59.8%) … $10.71 (long-prompt tier) → inside our bounds
+  (cost-state records are not cut by AGENTPRISM_UNTIL: they carry no per-call time.)

@@ -11,15 +11,17 @@ are in [RESEARCH.md](RESEARCH.md). AI agents did the research in one day, 2026-1
 1. **Most of the cost is sending the past again.** On every step an agent re-sends the whole conversation.
    - In the main chain that is about 85% of the cost: cache reads ≈65%, cache writes ≈20%.
    - The model's answers are the rest.
-   - Our accounting agrees with Claude Code's own cost records within about 1%. That check also caught a
-     wrong price in our table.
+   - For every model, Claude Code's own cost for the same tokens falls inside our price bounds. The
+     bounds are a range because the logs do not say whether a cache write was billed at the 5-minute or
+     1-hour rate. That check also caught a wrong price in our table.
 
 2. **A part of what is re-sent is no longer used.** We priced every block of context (a command's output, a
    file that was read, an answer) on every call that carried it.
    - By a liberal rule, about a fifth of the prompt cost (21%) carries blocks after their last use, most
      of all command output.
    - That rule is "a later output reuses one of the block's rare identifiers, or works on its file".
-   - It finds 98% of 212 uses known for certain. Its precision is not measured.
+   - It finds 98% of 212 uses known for certain. That check is nearly built in: the known uses (an edit's
+     text found in an earlier read) are themselves identifier matches. Its precision is not measured.
    - Use by meaning, with no shared identifier, is invisible.
    - The 21% is therefore an upper bound for this rule, not a saving anyone can bank.
 
@@ -82,7 +84,8 @@ How we checked:
 
 ## Evidence
 
-- **Cost.** It is checked against Claude Code's own records, within about 1%.
+- **Cost.** For every model, Claude Code's own records for the same tokens fall inside our price bounds
+  (write TTL unknown). See `r0-spend` in the snapshot.
 - **Block sizes.** Each block's size comes from the measured growth of the prompt; the fit explains 97% of
   that growth.
 - **"Used".** The rule is checked for recall on cases where use is certain. Its precision is still to be
