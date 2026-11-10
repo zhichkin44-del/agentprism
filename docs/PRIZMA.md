@@ -1,38 +1,38 @@
-# Prizma (Призма) — исследовательская программа v2 (10.11.2026)
+# Prizma — research program v2 (2026-11-10)
 
-Бывший AgentPrism. Цель: научно-исследовательский проект о том, **как ИИ использует контекст и как он может улучшать сам себя** — с инструментом, который это показывает и советует. Уже сделано (v1): `docs/RESEARCH.md` (R1–R4, Q1), `docs/FINDINGS.md`, `docs/COMPETITORS.md` — v2 строится поверх, не заново.
+Formerly AgentPrism. Goal: a research project on **how AI models use their context and how they can improve themselves**, with a tool that shows it and advises. v1 is done and stays the base: `docs/RESEARCH.md` (R1–R4, Q1), `docs/FINDINGS.md`, `docs/COMPETITORS.md`.
 
-## Главное правило (слово Саши)
-Всё проверяется по реальным источникам из интернета. Утверждение «такого ни у кого нет» пишется **только с доказательством поиска**: где искали, что нашли, дата. Иначе — «есть у X, мы делаем иначе/лучше вот так». Цифры — только измеренные, с методикой.
+## Ground rule
+Everything is checked against real sources. A claim "nobody has this" is written **only with proof of search**: where we looked, which queries, what we found, the date. Otherwise: "X has it; we do it differently/better like this". Numbers only when measured, with the method.
 
-## Этап 0 — что уже есть в мире (до любых новых экспериментов)
-| Шаг | Что делаем | Ворота — готово, когда |
+## Stage 0 — what already exists (before any new experiment)
+| Step | Work | Gate — done when |
 |---|---|---|
-| 0.1 | Обзор: статьи (arXiv, ACL/NeurIPS/ICLR), руководства Anthropic, Google, OpenAI по контексту; инструменты наблюдения (Langfuse, LangSmith, Helicone, Arize/Phoenix, AgentOps и др.); дополнить `docs/COMPETITORS.md` | `docs/prior-art.md`: таблица «кто · что умеет · ссылка · дата», ≥ 40 источников, каждый открыт и прочитан |
-| 0.2 | Карта пробелов: чего нет ни у кого | каждый пробел: перечень мест поиска + запросы + дата; «не нашли» ≠ «нет» — так и пишем |
-| 0.3 | Готовые методы, которые берём: сжатие и суммаризация контекста, кэш промптов, память, RAG, субагенты, скилы с постепенным раскрытием, ИИ-судья, рефлексия, правила из ошибок | `docs/methods.md`: метод · источник · как применим у нас · как измерим |
-| 0.4 | Формула уникальности | 3–5 утверждений «Prizma первая в …», каждое независимо подтверждено Claude и Gemini (две ветки, сверка в PR) |
+| 0.1 | Review: papers (arXiv, ACL/NeurIPS/ICLR), Anthropic / Google / OpenAI guides on context, observability tools (Langfuse, LangSmith, Helicone, Arize Phoenix, AgentOps, …); extend `docs/COMPETITORS.md` | `docs/prior-art.md`: table "who · what · link · date", ≥ 40 sources, each opened and read |
+| 0.2 | Gap map: what nobody has | each gap lists the places searched, the queries and the date; "not found" ≠ "does not exist" — say so |
+| 0.3 | Ready methods to reuse: context compaction and summarization, prompt caching, memory, RAG, subagents, skills with progressive disclosure, LLM-as-judge, reflection, rules learned from mistakes | `docs/methods.md`: method · source · how we apply it · how we measure it |
+| 0.4 | Uniqueness statement | 3–5 claims "Prizma is first in …", each confirmed independently by Claude and Gemini (two branches, reconciled in a PR) |
 
-## Вопросы исследования (после этапа 0, порядок может поменяться по итогам 0.2)
-| № | Вопрос | Как проверяем |
+## Research questions (after stage 0; order may change after 0.2)
+| # | Question | How |
 |---|---|---|
-| Q-A | Что модель реально использует из контекста, что игнорирует (середина длинного контекста) | контролируемые эксперименты с метками в разных позициях |
-| Q-B | Почему агент перечитывает одно и то же и сколько это стоит (v1: ~85 % стоимости — повтор контекста) | журналы Claude Code и Gemini, разметка кусков |
-| Q-C | Когда сжимать и что теряется (v1: правило в 4–16 % от оптимума) | повтор на новых данных и другой модели |
-| Q-D | Память, скилы, субагенты, кэш — что реально экономит и не портит качество | A/B на одинаковых задачах |
-| Q-E | Самоулучшение: рефлексия, ИИ-судья, правила из ошибок — даёт ли прирост | замер до/после на фиксированном наборе задач |
-| Q-F | Claude против Gemini: разное использование контекста | одни задачи на двух моделях |
+| Q-A | What the model actually uses from its context and what it ignores (middle of long contexts) | controlled experiments with markers at different positions |
+| Q-B | Why agents re-read the same content and what it costs (v1: ~85% of cost is re-sent context) | Claude Code and Gemini logs, chunk labelling |
+| Q-C | When to compact and what is lost (v1: rule within 4–16% of the optimum) | replicate on new data and another model |
+| Q-D | Memory, skills, subagents, cache — what really saves without hurting quality | A/B on identical tasks |
+| Q-E | Self-improvement: reflection, LLM-as-judge, rules from mistakes — is there a gain | before/after on a fixed task set |
+| Q-F | Claude vs Gemini: different use of context | same tasks on both models |
 
-## Роли
-| Кто | Где | Что |
+## Roles
+| Who | Where | What |
 |---|---|---|
-| Claude (второй аккаунт Pro, Sonnet; Opus — для проверки) | dev-machine | эксперименты, код инструмента, отчёты |
-| Gemini (Antigravity) | dev-machine | обзор литературы, перекрёстная проверка утверждений Claude |
-| Контроль (Claude Opus, директор Pulse AI) | zhichkin44-del | проверка PR: источники открываются, цифры воспроизводятся |
-| Саша | — | решения, слияние, публикация |
+| Claude (second Pro account; Sonnet, Opus for review) | dev-machine | experiments, tool code, reports |
+| Gemini (Antigravity) | dev-machine | literature review, cross-checking Claude's claims |
+| Review (Claude Opus, Pulse AI director) | zhichkin44-del | PR review: sources open, numbers reproduce |
+| Owner | — | decisions, merges, publishing |
 
-## Правила
-- Каждый работает в своей ветке (`claude/…`, `gemini/…`) → PR. В `main` не пушить.
-- Журналы агентов исследуются **только локально на своём ПК**; в git — только обезличенные агрегаты. Журналы могут содержать ключи и личное.
-- Эксперимент воспроизводим: скрипт + входные данные (или их описание) + команда запуска.
-- Наружу (статья, сайт, npm) — только по «да» Саши.
+## Rules
+- Each agent works on its own branch (`claude/…`, `gemini/…`) → PR. Never push to `main`.
+- Agent logs are analysed **only locally on their own machine**; git gets anonymized aggregates only. Logs may contain keys and private data.
+- Every experiment is reproducible: script + input data (or its description) + the command to run.
+- Anything public (paper, site, npm) only with the owner's "yes".
