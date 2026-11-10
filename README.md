@@ -1,4 +1,4 @@
-# AgentPrism
+# Prizma (formerly AgentPrism)
 
 **Context economics for AI coding agents.** See what your agent pays to re-read, what it carries
 long after its last use, and when compacting would actually pay off. Local-first: your logs never
