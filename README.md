@@ -4,6 +4,13 @@ AgentPrism reads the local logs of Claude Code and shows what the agent pays for
 
 ![Context economics of one Claude Code session with 3009 calls: the prompt per call, split into always-needed, used, earlier reasoning, and content carried after its last use](docs/assets/context-report.jpg)
 
+## Features
+
+- Reads the local Claude Code logs (`~/.claude/projects`) and computes everything locally; the database stores no message texts or file contents.
+- Shows the cost of each step, the share spent re-sending past context, and context blocks carried after their last use.
+- Estimates when compacting the context pays off, and checks whether a change made things cheaper (`compare`, `switchback`).
+- Terminal reports with `--json`, a self-contained `--html` page, and `--plugin` for your own detectors and adapters.
+
 ## What the real logs showed
 
 Data: 12 days of work by several agents on one machine, cut at 2026-11-04. Money values are API list-price equivalents, not an invoice. Method and caveats: [docs/FINDINGS.md](docs/FINDINGS.md) and [docs/RESEARCH.md](docs/RESEARCH.md).
@@ -27,12 +34,13 @@ Claude Code logs (~/.claude/projects, JSONL)
 
 Packages in `packages/`: `core`, `adapter-claude-code`, `adapter-traces`, `sdk`, `cli`. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the design and [LOG_FORMAT](docs/LOG_FORMAT.md), [TRACE_FORMAT](docs/TRACE_FORMAT.md), [CORRECTIONS_FORMAT](docs/CORRECTIONS_FORMAT.md) for the formats.
 
-## Install from zero (Windows, macOS or Linux)
-
-You need:
+## Requirements
 
 - [Git](https://git-scm.com/downloads)
 - [Node.js](https://nodejs.org/) 22.13 or newer (LTS). On Windows, use the installer from nodejs.org and open a new terminal afterwards.
+- Windows, macOS or Linux
+
+## Install from zero (Windows, macOS or Linux)
 
 Steps (PowerShell on Windows, or any shell on macOS/Linux):
 
@@ -45,6 +53,8 @@ node packages/cli/dist/index.js --root packages/adapter-claude-code/test/fixture
 ```
 
 The last command runs the report on the bundled test logs, so you can see the output without any personal data.
+
+## Usage
 
 To use your own logs (read from `~/.claude/projects`):
 
