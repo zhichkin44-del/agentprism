@@ -1,131 +1,71 @@
-# Prizma (formerly AgentPrism)
+# AgentPrism — куда уходят деньги ИИ-агента для кода
 
-**Context economics for AI coding agents.** See what your agent pays to re-read, what it carries
-long after its last use, and when compacting would actually pay off. Local-first: your logs never
-leave your machine.
+AgentPrism читает локальные журналы Claude Code и показывает, за что платит агент: сколько стоит каждый шаг, какую часть стоимости составляет повторная отправка истории, какие блоки контекста тащатся после последнего использования и когда сжатие контекста действительно окупается. Всё считается локально, журналы не покидают компьютер, в базе нет текстов сообщений и содержимого файлов.
 
-![Context economics of a 3,000-call Claude Code session: the prompt split, call by call, into what is always needed, content in use, earlier thinking and content carried after its last use; compactions as recorded and as the rule would place them](docs/assets/context-report.jpg)
+_EN: AgentPrism reads local Claude Code logs and shows where an AI coding agent's money goes: cost per call, the share spent re-sending history, context carried after its last use, and when compaction pays off. Local-first; no message text is stored. The docs in `docs/` and the code comments are in English._
 
-> Status: working prototype, not on npm yet. Claude Code is supported today. Install from source (below).
+![Экономика контекста одной сессии Claude Code из 3009 вызовов: промпт по вызовам, разбитый на нужное всегда, используемое, прежние рассуждения и то, что тащится после последнего использования](docs/assets/context-report.jpg)
 
-## Why
+## Что нашли на реальных журналах
 
-Coding agents re-send the whole conversation on every step. On 12 days of one user's real multi-agent
-work we found the following. Costs are API-equivalent at list prices. Method, validation and caveats are
-in [docs/FINDINGS.md](docs/FINDINGS.md).
+Данные: 12 дней работы нескольких агентов на одной машине, срез до 04.11.2026. Деньги — эквивалент по прайсу API, не счёт. Метод и оговорки — в [docs/FINDINGS.md](docs/FINDINGS.md) и [docs/RESEARCH.md](docs/RESEARCH.md).
 
-- **Most of the cost is sending the past again.** In the main chain that is about 85% of the cost (cache
-  reads ≈65%, cache writes ≈20%); the model's own answers are the rest. Claude Code's own cost for the
-  same tokens falls inside our price bounds for every model. The bounds are a range because the logs do
-  not say whether a cache write was billed at the 5-minute or 1-hour rate.
-- **A part of what is re-sent is no longer used.** By a liberal rule, about a fifth of the prompt cost
-  carries blocks after their last use, most of all command output. That is an upper bound. The rule
-  finds 98% of known uses, but that check is nearly built in: it matches identifiers, and so do the
-  known uses (an edit's text found in an earlier read). Its precision is not measured yet.
-- **A simple compaction rule tracks the exact optimum, if you know what forgetting costs.** The rule
-  compacts when the excess re-reading reaches the cost of one compaction, by analogy with ski-rental. In
-  simulation it stayed within 4–16% of the optimum computed in hindsight, at every assumed price of
-  forgetting from $0 to $20, when the rule was given that price. Given the wrong price (say $0 when it
-  is $20), it lost up to 2.5×. Fixed thresholds were up to 3× worse.
+- Около 85 % стоимости основной цепочки — повторная отправка прошлого (чтение кэша ≈65 %, запись в кэш ≈20 %).
+- Около 21 % стоимости промпта приходится на блоки после их последнего использования — это верхняя оценка по либеральному правилу, точность правила не измерена.
+- Простое правило сжатия (по аналогии с задачей об аренде лыж) в симуляции держалось в пределах 4–16 % от оптимума, посчитанного по всей сессии, если цена «забывания» задана верно; при неверной цене проигрыш до 2,5 раза.
 
-Usage counters tell you how much you spent, and Claude Code's `/usage` tells you where.
-[LangWatch](https://langwatch.ai/blog/context-tax-when-to-compact) measured what compaction costs on a
-large history and picked a threshold. AgentPrism prices every block of context with cache prices and
-checks its compaction rule against the exact optimum. See [how it compares](docs/COMPETITORS.md).
+## Схема
 
-## Install
+```
+журналы Claude Code (~/.claude/projects, JSONL)
+        │  adapter-claude-code: разбор, цены по TTL кэша
+        ▼
+   packages/core ── детекторы потерь (11 штук) · реестр цен · реестр контекста · compare / switchback
+        │                          │
+        ▼                          ▼
+   SQLite (токены, стоимость,     packages/cli: отчёты в терминале, --json, --html
+   имена инструментов, хеши)      packages/sdk: трассы своих LLM-вызовов (adapter-traces)
+```
 
-Requires Node.js 22.13 or newer.
+Пакеты в `packages/`: `core`, `adapter-claude-code`, `adapter-traces`, `sdk`, `cli`. Устройство — в [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), форматы — [LOG_FORMAT](docs/LOG_FORMAT.md), [TRACE_FORMAT](docs/TRACE_FORMAT.md), [CORRECTIONS_FORMAT](docs/CORRECTIONS_FORMAT.md).
+
+## Запуск одной командой
+
+Нужен Node.js 22.13 или новее. Из клона репозитория, на встроенных тестовых журналах:
 
 ```bash
-git clone https://github.com/zhichkin44-del/AgentPrism.git
-cd AgentPrism
-npm install
-npm run build
-npm link -w packages/cli   # puts `agentprism` on your PATH
+npm install && npm run build && node packages/cli/dist/index.js --root packages/adapter-claude-code/test/fixtures/projects --db .agentprism-try.db
 ```
 
-No build for a quick look: `npm run dev -- context` runs the CLI straight from source.
-
-## Quick start
+На своих журналах (читаются `~/.claude/projects`):
 
 ```bash
-agentprism context                       # the latest session: what it carries, and when to compact
-agentprism context "refactor" --html r.html   # a session by part of its title, plus an HTML report
-agentprism context --watch               # follow a live session; prints advice as it grows
+npm link -w packages/cli    # команда agentprism в PATH
+agentprism                  # расходы, дорогие сессии, главные находки
+agentprism context          # экономика контекста последней сессии, когда сжимать
+agentprism context --html r.html   # самодостаточная страница без текстов, путей и заголовков
+agentprism findings         # детекторы потерь: доказательства, оценка стоимости, что исправить
+agentprism compare          # стало ли дешевле после вашей правки: интервал и честный вердикт
 ```
 
-```
-◆ AgentPrism  context economics  advisory: changes nothing
-my long session · 2026-10-23 10:45 → 2026-10-27 10:13 · 3,009 calls · opus-5-5
+Ко всем командам можно добавить `--json`; `--plugin ./my-plugin.mjs` подключает свои детекторы и адаптеры.
 
-Re-reading the prompt  $295 84.8% of $348 (main chain)
-  always needed       $71.73  24.3%  █████···············  system, tools, summaries, your prompts
-  content in use        $114  38.5%  ████████············
-  after its last use   $74.4  25.2%  █████···············  upper bound: an oracle could drop it
-  earlier thinking    $35.22  11.9%  ██··················  use not visible in logs
+## Тесты
 
-When to compact (ski-rental rule; price of forgetting $0.5 per compaction, --rho to change)
-  as recorded                $348  6 compactions
-  with the rule              $234  23 compactions
-  exact optimum (hindsight)  $227  23 compactions
+```bash
+npm test
 ```
 
-`--html` writes a single self-contained page that you can show to anyone. It holds numbers, dates, model
-names and kinds of content only: no messages, paths, titles or ids. `--rho` is the price you put on what
-a compaction makes the agent forget. It is a choice, not a measurement (yet).
+Результат запуска 18.11.2026 в чистой копии (Vitest 5, Node.js): **61 тест в 11 файлах, все прошли**. Там же прошли `npm run typecheck` и `npm run lint`. CI (`.github/workflows/ci.yml`) гоняет проверки на Ubuntu, Windows и macOS, Node 22 и 24; на этой публикации CI ещё не запускался.
 
-## Commands
+## Ограничения
 
-| Command                  | What you get                                                                               |
-| ------------------------ | ------------------------------------------------------------------------------------------ |
-| `agentprism context [s]` | context economics of a session; `--html` report, `--watch` live advice, `--rho` forgetting |
-| `agentprism`             | spend headline, most expensive sessions, top findings                                      |
-| `agentprism report`      | spend by project, model, day, session and prompt; cache savings; cost by token kind        |
-| `agentprism findings`    | waste detectors with evidence, an estimated cost and a concrete fix for each finding       |
-| `agentprism mark <name>` | remember the moment you changed something (CLAUDE.md, habit, model)                        |
-| `agentprism compare`     | did it get cheaper? adjusted effect, 95% interval, noise floor, honest verdict             |
-| `agentprism switchback`  | plan a test that survives drift: a random ON/OFF schedule by day, analysed by `compare`    |
-| `agentprism modules`     | loaded plugins, adapters and detectors                                                     |
+- Стоимость — оценка по прайсу API на 06.10.2026, а не счёт: на подписке цифры показывают относительный вес.
+- «После последнего использования» — верхняя оценка: использование «по смыслу», без общего идентификатора, не видно.
+- На журналах одного человека обычное «до/после» почти ничего не доказывает (дрейф работы); `compare` поправляет оценку и говорит «нет явного изменения», когда это так. Чтобы доказать эффект, служит `agentprism switchback`.
+- Поддержан только Claude Code; другие агенты подключаются адаптерами.
+- Выводы получены на журналах одного пользователя за 12 дней.
 
-Add `--json` to any command for scripts, `--plugin ./my-plugin.mjs` to load your own modules.
+## Лицензия
 
-## How it works
-
-- **Exact cost.** Every model call is priced from its token usage: input, output, cache reads, and cache
-  writes by TTL. The price table is checked automatically against Claude Code's own cost records.
-- **Context ledger.** The growth of the prompt between two calls is measured exactly. It is split between
-  the blocks that entered it (tool output, file reads, the model's text and thinking) by weights fitted
-  on real logs. Each block is priced on every later call that re-reads it.
-- **Use.** A block counts as in use while later outputs reuse its rare identifiers or work on its file.
-  On cases where use is certain (an edit proves the agent had read the text) this finds 98% of them;
-  its precision is not measured yet.
-- **Compaction rule.** A rule modelled on ski-rental (no formal bound for this setting) compares accumulated excess re-reading with the cost of one
-  compaction. For comparison, the exact optimum is computed by dynamic programming over the recorded
-  session.
-
-The research behind it, including negative results, is in [docs/RESEARCH.md](docs/RESEARCH.md). The
-scripts that produced it are in [`research/`](research).
-
-## Honest limits
-
-- Costs are **API-equivalent estimates** at list prices. On a subscription they show relative weight,
-  not a bill.
-- "After its last use" is an **upper bound**. Use by meaning, without a shared identifier, is invisible.
-  Dropping a block from the middle of a cached prompt is not free.
-- **A plain before/after rarely proves anything on one person's logs.** A placebo study found
-  order-of-magnitude apparent changes where nothing changed, because work drifts. `compare` therefore
-  adjusts for prompt size, model, origin, project and trend. It reports an interval and the noise floor,
-  and says "no clear change" or "not enough data" when that is the truth. To prove a change, use
-  `agentprism switchback`.
-
-## Privacy
-
-Everything runs locally. The database in `~/.agentprism/` stores tokens, costs, tool names and their
-targets (file paths, the start of a command line) and hashes. It does not store your prompts, answers or
-file contents. Content is read from the logs only in memory, for the session being analysed.
-
-## Status
-
-Prototype. [Plan](docs/PLAN.md) · [Findings](docs/FINDINGS.md) · [Architecture](docs/ARCHITECTURE.md) ·
-[Metrics and definitions](docs/METRICS.md)
+MIT

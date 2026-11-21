@@ -1,6 +1,6 @@
 # What we found: the economics of an AI agent's context
 
-_Data: 12 days of real work by one studio of AI coding agents on one machine (Claude Code logs plus git
+_Data: 12 days of real work by one multi-agent setup of AI coding agents on one machine (Claude Code logs plus git
 history), up to 2026-11-04 08:20 UTC. All dollar figures are API-equivalent at Anthropic list prices, not a
 bill. Everything was computed locally; no message left the machine. Numbers come from the snapshot
 [`research/results/2026-11-04T0820Z.txt`](../research/results/2026-11-04T0820Z.txt). Methods and caveats

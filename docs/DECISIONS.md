@@ -40,7 +40,7 @@ It contains personal details. Moved to `_archive/`, which is gitignored.
 ## D8 — Ambition: a popular open-source devtool, not a personal script (2026-10-23)
 
 Context: the user wants this to be a flagship project (target 1,000+ stars) that grows into a platform.
-Decision: plugin architecture from day one, polished UI, launch plan. See VISION.md and ROADMAP.md.
+Decision: plugin architecture from day one, polished UI, launch plan.
 v0.1 stays scoped to Claude Code so it ships within ~16 hours.
 
 ## D9 — Differentiate from usage counters (2026-10-23)
@@ -91,7 +91,7 @@ Context: the user wants to embed AgentPrism into their own AI products and have 
 Decision: the core schema is already agent-agnostic (session → turn → model call → tool call).
 Own products plug in through a new adapter: a tiny SDK (`@agentprism/sdk`) that wraps LLM client calls and
 writes events in AgentPrism's own JSONL format, plus an OTel GenAI span importer. Same store, same detectors.
-Sequenced after the coding-agent detectors prove useful (ROADMAP v0.2).
+Sequenced after the coding-agent detectors prove useful.
 
 ## D17 — Costs computed in SQL via a registered function (2026-10-23)
 
@@ -170,7 +170,7 @@ be useful, and reports are meant to be shown to other people.
 ## D28 — Research summary in English in the repo; the Russian original stays private (2026-11-04)
 
 `docs/FINDINGS.md` is the one-page summary of the research, for the owner and a future site page. The repo is
-English-only (D6), so the Russian original lives in the Studio's session notes, outside git.
+English-only (D6), so the Russian original lives in the author's session notes, outside git.
 
 ## D29 — `compare` reports an adjusted effect with an honest verdict (2026-11-04)
 

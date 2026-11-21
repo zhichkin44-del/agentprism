@@ -51,7 +51,7 @@ code needs no extra arguments. `prism.tool(name, fn)` traces tool runs. Format: 
 One npm package, one command. `npx agentprism` runs a CLI that scans logs into a local SQLite
 database (incrementally) and prints the analysis. Terminal first (D14); a web app comes later as one more view.
 No Electron, no native modules, no account. Desktop tray app and editor extensions come later
-as thin shells over the same local server (see ROADMAP v1.0).
+as thin shells over the same local server.
 
 ## Data flow
 
@@ -87,7 +87,7 @@ as thin shells over the same local server (see ROADMAP v1.0).
 .
 ├── CLAUDE.md                     working agreement for the agent
 ├── README.md                     public face
-├── docs/                         VISION, ROADMAP, LAUNCH, PLAN, PROGRESS, DECISIONS, ARCHITECTURE, LOG_FORMAT, METRICS
+├── docs/                         ARCHITECTURE, DECISIONS, FINDINGS, RESEARCH, LOG_FORMAT, TRACE_FORMAT, CORRECTIONS_FORMAT, METRICS, COMPETITORS
 ├── packages/
 │   ├── core/                     schema, plugin interfaces, store, analytics, built-in detectors and fixes, pricing
 │   ├── adapter-claude-code/      Claude Code log reader (+ test/fixtures: synthetic logs only)

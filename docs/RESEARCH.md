@@ -98,7 +98,7 @@ one user, 12 days, about 10K calls on this machine. A second machine holds about
 - **How to prove it.** Predict commit survival on held-out sessions (AUROC), then check stability
   across projects.
 - **Risk.** The signals are noisy, and there is one author.
-- **Testable now:** yes, with logs plus the Studio repositories.
+- **Testable now:** yes, with logs plus the author's repositories.
 
 ### C5. Calibrated cost forecast for a task in flight
 
@@ -333,7 +333,7 @@ The mean cost of a corrected agent turn is $0.74 (median $0.16).
 
 Script: `research/r4-survival.mjs`. Of 2,258 agent edits in the snapshot, 680 were outside git (notes,
 scratch files), 32 failed or were denied, and 29 were never committed. That leaves 1,512 edits in 22
-sessions, in 14 Studio repositories. Durability depends on today's HEAD, so it moves even with the cutoff.
+sessions, in 14 repositories of the author. Durability depends on today's HEAD, so it moves even with the cutoff.
 
 **How it is measured.**
 
@@ -371,7 +371,7 @@ sessions, in 14 Studio repositories. Durability depends on today's HEAD, so it m
   not quality: new files written whole almost always survive, and edits in long sessions survive slightly
   more. Edits followed by an owner correction survived at least as often as others.
 
-- **A hypothesis, not a finding.** Studio agents commit their own work right away, so "in the next commit"
+- **A hypothesis, not a finding.** The agents commit their own work right away, so "in the next commit"
   is nearly automatic. We think code that dies later mostly dies because the product moves on. These
   logs cannot separate that from mistakes, so it was not measured.
 - **C4 is not supported on this data.** Commit survival did not work as a quality label here. The owner's

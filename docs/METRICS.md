@@ -88,7 +88,7 @@ passes for Opus, Sonnet and Haiku 5.5. Estimated waste is $440 (51%). Loops fell
 (3 findings instead of 16), and permission friction from $3.27 to $0. The headline share is still driven by
 the context-growth upper bound ($374); see `RESEARCH.md`.
 
-**What-if prototype (auto-compact threshold, main chain, corrected prices).** Replays every call with the
+**What-if experiment (auto-compact threshold, main chain, corrected prices).** Replays every call with the
 history beyond the threshold removed; after a compaction the context restarts at 96K (median of 16 real
 compactions in these logs); each simulated compaction costs one summarizing call.
 

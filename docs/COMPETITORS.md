@@ -30,7 +30,7 @@ agent waste. AgentPrism's SDK has no edge here.
 3. **Switchback tests of a coding-agent workflow**, analysed from the agent's own logs.
 
 A threshold what-if on past logs is not new. LangWatch's blog shows the same kind of curve, which is why
-the earlier "what-if" idea was dropped (see `PROGRESS.md`, 2026-11-04).
+the earlier "what-if" idea was dropped.
 
 [ccusage]: https://github.com/ryoppippi/ccusage
 [Claude-Code-Usage-Monitor]: https://github.com/Maciek-roboblog/Claude-Code-Usage-Monitor

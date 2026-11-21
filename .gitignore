@@ -11,3 +11,4 @@ coverage/
 *.db
 _archive/
 .ci/
+.agentprism-try.db
