@@ -1,71 +1,81 @@
-# AgentPrism — куда уходят деньги ИИ-агента для кода
+# AgentPrism — where an AI coding agent's money goes
 
-AgentPrism читает локальные журналы Claude Code и показывает, за что платит агент: сколько стоит каждый шаг, какую часть стоимости составляет повторная отправка истории, какие блоки контекста тащатся после последнего использования и когда сжатие контекста действительно окупается. Всё считается локально, журналы не покидают компьютер, в базе нет текстов сообщений и содержимого файлов.
+AgentPrism reads the local logs of Claude Code and shows what the agent pays for: the cost of each step, the share spent re-sending the history, the context blocks carried after their last use, and when compacting the context actually pays off. Everything is computed locally. Logs never leave your computer, and the database stores no message texts or file contents.
 
-_EN: AgentPrism reads local Claude Code logs and shows where an AI coding agent's money goes: cost per call, the share spent re-sending history, context carried after its last use, and when compaction pays off. Local-first; no message text is stored. The docs in `docs/` and the code comments are in English._
+![Context economics of one Claude Code session with 3009 calls: the prompt per call, split into always-needed, used, earlier reasoning, and content carried after its last use](docs/assets/context-report.jpg)
 
-![Экономика контекста одной сессии Claude Code из 3009 вызовов: промпт по вызовам, разбитый на нужное всегда, используемое, прежние рассуждения и то, что тащится после последнего использования](docs/assets/context-report.jpg)
+## What the real logs showed
 
-## Что нашли на реальных журналах
+Data: 12 days of work by several agents on one machine, cut at 2026-11-04. Money values are API list-price equivalents, not an invoice. Method and caveats: [docs/FINDINGS.md](docs/FINDINGS.md) and [docs/RESEARCH.md](docs/RESEARCH.md) (the research log is still in Russian; an English translation is pending).
 
-Данные: 12 дней работы нескольких агентов на одной машине, срез до 04.11.2026. Деньги — эквивалент по прайсу API, не счёт. Метод и оговорки — в [docs/FINDINGS.md](docs/FINDINGS.md) и [docs/RESEARCH.md](docs/RESEARCH.md).
+- About 85% of the main chain's cost is re-sending past context (cache reads about 65%, cache writes about 20%).
+- About 21% of the prompt cost goes to blocks carried after their last use. This is an upper estimate under a liberal rule; the rule's accuracy has not been measured.
+- A simple compaction rule (modeled on the ski-rental problem) stayed within 4–16% of the optimum computed over the whole session, when the "forgetting" price is set correctly. With a wrong price, the loss reaches 2.5x.
 
-- Около 85 % стоимости основной цепочки — повторная отправка прошлого (чтение кэша ≈65 %, запись в кэш ≈20 %).
-- Около 21 % стоимости промпта приходится на блоки после их последнего использования — это верхняя оценка по либеральному правилу, точность правила не измерена.
-- Простое правило сжатия (по аналогии с задачей об аренде лыж) в симуляции держалось в пределах 4–16 % от оптимума, посчитанного по всей сессии, если цена «забывания» задана верно; при неверной цене проигрыш до 2,5 раза.
-
-## Схема
+## Architecture
 
 ```
-журналы Claude Code (~/.claude/projects, JSONL)
-        │  adapter-claude-code: разбор, цены по TTL кэша
+Claude Code logs (~/.claude/projects, JSONL)
+        │  adapter-claude-code: parsing, prices by cache TTL
         ▼
-   packages/core ── детекторы потерь (11 штук) · реестр цен · реестр контекста · compare / switchback
+   packages/core ── loss detectors (11) · price registry · context registry · compare / switchback
         │                          │
         ▼                          ▼
-   SQLite (токены, стоимость,     packages/cli: отчёты в терминале, --json, --html
-   имена инструментов, хеши)      packages/sdk: трассы своих LLM-вызовов (adapter-traces)
+   SQLite (tokens, cost,          packages/cli: terminal reports, --json, --html
+   tool names, hashes)            packages/sdk: traces of your own LLM calls (adapter-traces)
 ```
 
-Пакеты в `packages/`: `core`, `adapter-claude-code`, `adapter-traces`, `sdk`, `cli`. Устройство — в [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), форматы — [LOG_FORMAT](docs/LOG_FORMAT.md), [TRACE_FORMAT](docs/TRACE_FORMAT.md), [CORRECTIONS_FORMAT](docs/CORRECTIONS_FORMAT.md).
+Packages in `packages/`: `core`, `adapter-claude-code`, `adapter-traces`, `sdk`, `cli`. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the design and [LOG_FORMAT](docs/LOG_FORMAT.md), [TRACE_FORMAT](docs/TRACE_FORMAT.md), [CORRECTIONS_FORMAT](docs/CORRECTIONS_FORMAT.md) for the formats.
 
-## Запуск одной командой
+## Install from zero (Windows, macOS or Linux)
 
-Нужен Node.js 22.13 или новее. Из клона репозитория, на встроенных тестовых журналах:
+You need:
+
+- [Git](https://git-scm.com/downloads)
+- [Node.js](https://nodejs.org/) 22.13 or newer (LTS). On Windows, use the installer from nodejs.org and open a new terminal afterwards.
+
+Steps (PowerShell on Windows, or any shell on macOS/Linux):
 
 ```bash
-npm install && npm run build && node packages/cli/dist/index.js --root packages/adapter-claude-code/test/fixtures/projects --db .agentprism-try.db
+git clone https://github.com/zhichkin44-del/agentprism.git
+cd agentprism
+npm install
+npm run build
+node packages/cli/dist/index.js --root packages/adapter-claude-code/test/fixtures/projects --db .agentprism-try.db
 ```
 
-На своих журналах (читаются `~/.claude/projects`):
+The last command runs the report on the bundled test logs, so you can see the output without any personal data.
+
+To use your own logs (read from `~/.claude/projects`):
 
 ```bash
-npm link -w packages/cli    # команда agentprism в PATH
-agentprism                  # расходы, дорогие сессии, главные находки
-agentprism context          # экономика контекста последней сессии, когда сжимать
-agentprism context --html r.html   # самодостаточная страница без текстов, путей и заголовков
-agentprism findings         # детекторы потерь: доказательства, оценка стоимости, что исправить
-agentprism compare          # стало ли дешевле после вашей правки: интервал и честный вердикт
+npm link -w packages/cli    # puts the `agentprism` command on your PATH
+agentprism                  # costs, expensive sessions, main findings
+agentprism context          # context economics of the last session, when to compact
+agentprism context --html r.html   # a self-contained page with no texts, paths or titles
+agentprism findings         # loss detectors: evidence, cost estimate, what to fix
+agentprism compare          # did it get cheaper after your change: interval and an honest verdict
 ```
 
-Ко всем командам можно добавить `--json`; `--plugin ./my-plugin.mjs` подключает свои детекторы и адаптеры.
+Add `--json` to any command for machine-readable output. `--plugin ./my-plugin.mjs` loads your own detectors and adapters.
 
-## Тесты
+## Tests
 
 ```bash
-npm test
+npm test          # unit tests (Vitest)
+npm run check     # lint, typecheck and tests
 ```
 
-Результат запуска 18.11.2026 в чистой копии (Vitest 5, Node.js): **61 тест в 11 файлах, все прошли**. Там же прошли `npm run typecheck` и `npm run lint`. CI (`.github/workflows/ci.yml`) гоняет проверки на Ubuntu, Windows и macOS, Node 22 и 24; на этой публикации CI ещё не запускался.
+Verified on 2026-11-21 on Windows 11 with Node.js 24 in a clean clone: 61 tests in 11 files pass; `npm run typecheck`, `npm run lint` and `npm run build` pass. The CI workflow (`.github/workflows/ci.yml`) runs the checks on Ubuntu, Windows and macOS with Node 22 and 24.
 
-## Ограничения
+## Limits
 
-- Стоимость — оценка по прайсу API на 06.10.2026, а не счёт: на подписке цифры показывают относительный вес.
-- «После последнего использования» — верхняя оценка: использование «по смыслу», без общего идентификатора, не видно.
-- На журналах одного человека обычное «до/после» почти ничего не доказывает (дрейф работы); `compare` поправляет оценку и говорит «нет явного изменения», когда это так. Чтобы доказать эффект, служит `agentprism switchback`.
-- Поддержан только Claude Code; другие агенты подключаются адаптерами.
-- Выводы получены на журналах одного пользователя за 12 дней.
+- Cost is an estimate at API prices as of 2026-10-06, not an invoice. On a subscription, the figures show relative weight only.
+- "After last use" is an upper estimate: use is judged by meaning, and there is no shared identifier to check it.
+- On one person's logs, a plain before/after comparison proves very little (the work itself drifts). `compare` corrects for this and reports "no clear change" when that is the case. To prove an effect, use `agentprism switchback`.
+- Only Claude Code is supported; other agents can be added through adapters.
+- The findings come from one user's logs covering 12 days.
 
-## Лицензия
+## License
 
 MIT
