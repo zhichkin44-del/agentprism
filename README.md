@@ -6,7 +6,7 @@ AgentPrism reads the local logs of Claude Code and shows what the agent pays for
 
 ## What the real logs showed
 
-Data: 12 days of work by several agents on one machine, cut at 2026-11-04. Money values are API list-price equivalents, not an invoice. Method and caveats: [docs/FINDINGS.md](docs/FINDINGS.md) and [docs/RESEARCH.md](docs/RESEARCH.md) (the research log is still in Russian; an English translation is pending).
+Data: 12 days of work by several agents on one machine, cut at 2026-11-04. Money values are API list-price equivalents, not an invoice. Method and caveats: [docs/FINDINGS.md](docs/FINDINGS.md) and [docs/RESEARCH.md](docs/RESEARCH.md).
 
 - About 85% of the main chain's cost is re-sending past context (cache reads about 65%, cache writes about 20%).
 - About 21% of the prompt cost goes to blocks carried after their last use. This is an upper estimate under a liberal rule; the rule's accuracy has not been measured.
